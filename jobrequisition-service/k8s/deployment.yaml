@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobrequisition-service
+  labels:
+    app: jobrequisition-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jobrequisition-service
+  template:
+    metadata:
+      labels:
+        app: jobrequisition-service
+    spec:
+      containers:
+        - name: jobrequisition-service
+          image: techbu/hcm-jobrequisition-service:latest
+          ports:
+            - containerPort: 9124
+          envFrom:
+            - configMapRef:
+                name: jobrequisition-service-config
+            - secretRef:
+                name: jobrequisition-service-secrets 

@@ -1,0 +1,13 @@
+/hcm-parent/.idea
+/.vscode
+/.idea
+/hcm-common/target
+/hcm-message-broker/target
+/candidate-service/target
+/tenant-service/target
+/hcm-core/target
+/organization-service/target
+/jobrequisition-service/target
+/position-service/target
+/vendor-service/target
+/application-service/target

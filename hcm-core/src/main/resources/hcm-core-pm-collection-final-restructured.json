@@ -1,0 +1,2368 @@
+{
+  "info": {
+    "_postman_id": "hcm-core-collection-uuid",
+    "name": "HCM Core API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Complete Postman collection for HCM Core Service API with collection variables for candidateId, vendorId, tenantId, and organizationId."
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "// Set static tenantId and organizationId for all create requests",
+          "pm.collectionVariables.set('tenantId', 'a15104c0-44b7-4512-b9b1-6122e7af7d41');",
+          "pm.collectionVariables.set('organizationId', '08b06d14-4e03-11f0-bc56-325096b39f47');",
+          "",
+          "// Generate random data functions",
+          "function uuidv4() {",
+          "  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {",
+          "    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);",
+          "    return v.toString(16);",
+          "  });",
+          "}",
+          "",
+          "function randomEmail() {",
+          "  const domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'example.com'];",
+          "  const names = ['john', 'jane', 'mike', 'sarah', 'david', 'emma', 'alex', 'lisa', 'tom', 'anna'];",
+          "  const randomName = names[Math.floor(Math.random() * names.length)];",
+          "  const randomNumber = Math.floor(Math.random() * 10000);",
+          "  const randomDomain = domains[Math.floor(Math.random() * domains.length)];",
+          "  return `${randomName}${randomNumber}@${randomDomain}`;",
+          "}",
+          "",
+          "function randomPhone() {",
+          "  const areaCodes = ['212', '415', '310', '312', '404', '305', '702', '602', '713', '214'];",
+          "  const randomAreaCode = areaCodes[Math.floor(Math.random() * areaCodes.length)];",
+          "  const randomNumber = Math.floor(1000000 + Math.random() * 9000000);",
+          "  return `+1-${randomAreaCode}-${randomNumber}`;",
+          "}",
+          "",
+          "function randomDate(start, end) {",
+          "  const d = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));",
+          "  return d.toISOString().split('T')[0];",
+          "}",
+          "",
+          "function randomName() {",
+          "  const firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Emma', 'Alex', 'Lisa', 'Tom', 'Anna', 'James', 'Mary', 'Robert', 'Patricia', 'William', 'Jennifer', 'Richard', 'Linda', 'Joseph', 'Elizabeth'];",
+          "  const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin'];",
+          "  return {",
+          "    firstName: firstNames[Math.floor(Math.random() * firstNames.length)],",
+          "    lastName: lastNames[Math.floor(Math.random() * lastNames.length)]",
+          "  };",
+          "}",
+          "",
+          "function randomCompanyName() {",
+          "  const prefixes = ['Tech', 'Global', 'Innovative', 'Advanced', 'Smart', 'Digital', 'Future', 'Next', 'Elite', 'Prime'];",
+          "  const suffixes = ['Solutions', 'Systems', 'Technologies', 'Corp', 'Inc', 'Labs', 'Group', 'Partners', 'Enterprises', 'Services'];",
+          "  const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];",
+          "  const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];",
+          "  return `${randomPrefix} ${randomSuffix}`;",
+          "}",
+          "",
+          "function randomAddress() {",
+          "  const streets = ['Main St', 'Oak Ave', 'Pine Rd', 'Elm St', 'Cedar Ln', 'Maple Dr', 'Washington Blvd', 'Park Ave', 'Broadway', '5th Ave'];",
+          "  const cities = ['New York', 'San Francisco', 'Los Angeles', 'Chicago', 'Boston', 'Seattle', 'Austin', 'Denver', 'Miami', 'Atlanta'];",
+          "  const states = ['NY', 'CA', 'TX', 'IL', 'MA', 'WA', 'CO', 'FL', 'GA', 'PA'];",
+          "  const randomStreet = streets[Math.floor(Math.random() * streets.length)];",
+          "  const randomCity = cities[Math.floor(Math.random() * cities.length)];",
+          "  const randomState = states[Math.floor(Math.random() * states.length)];",
+          "  const randomNumber = Math.floor(100 + Math.random() * 900);",
+          "  const randomZip = Math.floor(10000 + Math.random() * 90000);",
+          "  return {",
+          "    street: `${randomNumber} ${randomStreet}`,",
+          "    city: randomCity,",
+          "    state: randomState,",
+          "    zip: randomZip.toString()",
+          "  };",
+          "}",
+          "",
+          "function randomJobTitle() {",
+          "  const titles = ['Senior Software Engineer', 'Full Stack Developer', 'Data Scientist', 'Product Manager', 'DevOps Engineer', 'Frontend Developer', 'Backend Developer', 'QA Engineer', 'System Administrator', 'UI/UX Designer'];",
+          "  return titles[Math.floor(Math.random() * titles.length)];",
+          "}",
+          "",
+          "function randomSalary() {",
+          "  return Math.floor(50000 + Math.random() * 150000);",
+          "}",
+          "",
+          "// Generate random candidate data",
+          "const candidateName = randomName();",
+          "const candidateAddress = randomAddress();",
+          "pm.collectionVariables.set('candidateEmail', randomEmail());",
+          "pm.collectionVariables.set('candidateFirstName', candidateName.firstName);",
+          "pm.collectionVariables.set('candidateLastName', candidateName.lastName);",
+          "pm.collectionVariables.set('candidatePhone', randomPhone());",
+          "pm.collectionVariables.set('candidateDOB', randomDate(new Date(1980,0,1), new Date(2000,0,1)));",
+          "pm.collectionVariables.set('candidateStatus', 'Active');",
+          "pm.collectionVariables.set('candidateAddress', candidateAddress.street);",
+          "pm.collectionVariables.set('candidateCity', candidateAddress.city);",
+          "pm.collectionVariables.set('candidateState', candidateAddress.state);",
+          "pm.collectionVariables.set('candidateZip', candidateAddress.zip);",
+          "pm.collectionVariables.set('candidateCurrentSalary', randomSalary());",
+          "pm.collectionVariables.set('candidateExpectedSalary', randomSalary());",
+          "",
+          "// Generate random position data",
+          "pm.collectionVariables.set('positionTitle', randomJobTitle());",
+          "pm.collectionVariables.set('positionStatus', 'Active');",
+          "pm.collectionVariables.set('positionMinSalary', randomSalary());",
+          "pm.collectionVariables.set('positionMaxSalary', randomSalary() + 50000);",
+          "",
+          "// Generate random application data",
+          "pm.collectionVariables.set('applicationStatus', 'Applied');",
+          "pm.collectionVariables.set('applicationDate', randomDate(new Date(2024,0,1), new Date(2024,11,31)));",
+          "",
+          "// Generate random vendor data",
+          "const vendorCompany = randomCompanyName();",
+          "const vendorAddress = randomAddress();",
+          "pm.collectionVariables.set('vendorName', vendorCompany);",
+          "pm.collectionVariables.set('vendorEmail', randomEmail());",
+          "pm.collectionVariables.set('vendorPhone', randomPhone());",
+          "pm.collectionVariables.set('vendorAddress', vendorAddress.street);",
+          "pm.collectionVariables.set('vendorCity', vendorAddress.city);",
+          "pm.collectionVariables.set('vendorState', vendorAddress.state);",
+          "pm.collectionVariables.set('vendorZip', vendorAddress.zip);",
+          "",
+          "// Generate random organization data",
+          "const orgCompany = randomCompanyName();",
+          "const orgAddress = randomAddress();",
+          "pm.collectionVariables.set('organizationName', orgCompany);",
+          "pm.collectionVariables.set('organizationEmail', randomEmail());",
+          "pm.collectionVariables.set('organizationPhone', randomPhone());",
+          "pm.collectionVariables.set('organizationAddress', orgAddress.street);",
+          "pm.collectionVariables.set('organizationCity', orgAddress.city);",
+          "pm.collectionVariables.set('organizationState', orgAddress.state);",
+          "pm.collectionVariables.set('organizationZip', orgAddress.zip);",
+          "",
+          "// Generate random tenant data",
+          "pm.collectionVariables.set('tenantName', randomCompanyName() + ' Corp');",
+          "pm.collectionVariables.set('tenantDomain', randomEmail().split('@')[1]);",
+          "pm.collectionVariables.set('tenantContactEmail', randomEmail());",
+          "pm.collectionVariables.set('tenantContactPhone', randomPhone());",
+          "",
+          "// Generate random vendorId for candidate creation",
+          "pm.collectionVariables.set('vendorId', uuidv4())"
+        ],
+        "type": "text/javascript"
+      }
+    },
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "// Add authentication header if token is available",
+          "if (pm.collectionVariables.get('authToken') && pm.collectionVariables.get('authToken') !== '') {",
+          "  pm.request.headers.add({",
+          "    key: 'Authorization',",
+          "    value: 'Bearer ' + pm.collectionVariables.get('authToken')",
+          "  });",
+          "}"
+        ],
+        "type": "text/javascript"
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "exec": [
+          "// Global error handling and response validation",
+          "pm.test('Response time is less than 5000ms', function () {",
+          "  pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});",
+          "",
+          "pm.test('Response has valid status code', function () {",
+          "  pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 403, 404, 500]);",
+          "});",
+          "",
+          "// Log response for debugging",
+          "if (pm.response.code >= 400) {",
+          "  console.log('Error Response:', pm.response.text());",
+          "}",
+          "",
+          "// Validate JSON response structure",
+          "if (pm.response.code < 400 && pm.response.headers.get('Content-Type') && pm.response.headers.get('Content-Type').includes('application/json')) {",
+          "  try {",
+          "    const jsonResponse = pm.response.json();",
+          "    pm.test('Response is valid JSON', function () {",
+          "      pm.expect(jsonResponse).to.be.an('object');",
+          "    });",
+          "  } catch (e) {",
+          "    pm.test('Response is valid JSON', function () {",
+          "      pm.expect.fail('Response is not valid JSON');",
+          "    });",
+          "  }",
+          "}"
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9112/api/v1"
+    },
+    {
+      "key": "authToken",
+      "value": ""
+    },
+    {
+      "key": "candidateId",
+      "value": ""
+    },
+    {
+      "key": "vendorId",
+      "value": ""
+    },
+    {
+      "key": "tenantId",
+      "value": ""
+    },
+    {
+      "key": "organizationId",
+      "value": ""
+    },
+    {
+      "key": "applicationId",
+      "value": ""
+    },
+    {
+      "key": "jobRequisitionId",
+      "value": ""
+    },
+    {
+      "key": "positionId",
+      "value": ""
+    },
+    {
+      "key": "positionStatusId",
+      "value": ""
+    },
+    {
+      "key": "applicationStatusId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Master Data",
+      "item": [
+        {
+          "name": "Get All Document Types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/document-types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "document-types"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Master data validation for Document Types",
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', function () {",
+                  "  const response = pm.response.json();",
+                  "  pm.expect(response).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Document types have required fields', function () {",
+                  "  const documentTypes = pm.response.json();",
+                  "  if (documentTypes.length > 0) {",
+                  "    const firstType = documentTypes[0];",
+                  "    pm.expect(firstType).to.have.property('typeId');",
+                  "    pm.expect(firstType).to.have.property('typeName');",
+                  "    pm.expect(firstType).to.have.property('isRequired');",
+                  "  }",
+                  "});",
+                  "",
+                  "// Log document types count for debugging",
+                  "const documentTypes = pm.response.json();",
+                  "console.log('Found', documentTypes.length, 'document types');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Document Type by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/document-types/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "document-types",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Document Types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/document-types/search?query=resume&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "document-types",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "resume"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All ID Types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/id-types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "id-types"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get ID Type by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/id-types/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "id-types",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search ID Types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/id-types/search?query=passport&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "id-types",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "passport"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Countries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/countries",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "countries"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Country by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/countries/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "countries",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Country by Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/countries/code/US",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "countries",
+                "code",
+                "US"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Countries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/countries/search?query=United&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "countries",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "United"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All States",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/states",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "states"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search States",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/states/search?query=California&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "states",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "California"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Skills",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/skills",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "skills"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Skills",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/skills/search?query=Java&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "skills",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "Java"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/departments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "departments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Departments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/departments/search?query=Engineering&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "departments",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "Engineering"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All User Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/user-roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "user-roles"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search User Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/user-roles/search?query=admin&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "user-roles",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "admin"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All User Types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/user-types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "user-types"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search User Types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/master-data/user-types/search?query=employee&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "master-data",
+                "user-types",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "employee"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Candidates",
+      "item": [
+        {
+          "name": "{candidateId}",
+          "item": [
+            {
+              "name": "Get Candidate by ID",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/candidates/{{candidateId}}"
+                }
+              }
+            },
+            {
+              "name": "Update Candidate",
+              "request": {
+                "method": "PUT",
+                "url": {
+                  "raw": "{{baseUrl}}/candidates/{{candidateId}}"
+                }
+              }
+            },
+            {
+              "name": "Delete Candidate",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/candidates/{{candidateId}}"
+                }
+              }
+            },
+            {
+              "name": "skills",
+              "item": [
+                {
+                  "name": "Get Candidate Skills",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/skills"
+                    }
+                  }
+                },
+                {
+                  "name": "Add Candidate Skill",
+                  "request": {
+                    "method": "POST",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/skills"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "educations",
+              "item": [
+                {
+                  "name": "Get Candidate Educations",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/educations"
+                    }
+                  }
+                },
+                {
+                  "name": "Add Candidate Education",
+                  "request": {
+                    "method": "POST",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/educations"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "work-histories",
+              "item": [
+                {
+                  "name": "Get Candidate Work Histories",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/work-histories"
+                    }
+                  }
+                },
+                {
+                  "name": "Add Candidate Work History",
+                  "request": {
+                    "method": "POST",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/work-histories"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "certifications",
+              "item": [
+                {
+                  "name": "Get Candidate Certifications",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/certifications"
+                    }
+                  }
+                },
+                {
+                  "name": "Add Candidate Certification",
+                  "request": {
+                    "method": "POST",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/certifications"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "references",
+              "item": [
+                {
+                  "name": "Get Candidate References",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/references"
+                    }
+                  }
+                },
+                {
+                  "name": "Add Candidate Reference",
+                  "request": {
+                    "method": "POST",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/references"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "identities",
+              "item": [
+                {
+                  "name": "Get Candidate Identities",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/identities"
+                    }
+                  }
+                },
+                {
+                  "name": "Add Candidate Identity",
+                  "request": {
+                    "method": "POST",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/identities"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "documents",
+              "item": [
+                {
+                  "name": "Get Candidate Documents",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/documents"
+                    }
+                  }
+                },
+                {
+                  "name": "Add Candidate Document",
+                  "request": {
+                    "method": "POST",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/documents"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "response-status",
+              "item": [
+                {
+                  "name": "Get Candidate Response Status by ID",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/{{candidateId}}/response-status"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "response-status",
+          "item": [
+            {
+              "name": "Get All Candidate Response Statuses",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/candidates/response-status"
+                }
+              }
+            },
+            {
+              "name": "{email}",
+              "item": [
+                {
+                  "name": "Get Candidate Response Status by Email",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/response-status/{{email}}"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "{candidateId}",
+              "item": [
+                {
+                  "name": "Delete Candidate Response Status",
+                  "request": {
+                    "method": "DELETE",
+                    "url": {
+                      "raw": "{{baseUrl}}/candidates/response-status/{{candidateId}}"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Get All Candidates",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/candidates"
+            }
+          }
+        },
+        {
+          "name": "Create Candidate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/candidates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "candidates"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"organizationId\": \"{{organizationId}}\",\n  \"firstName\": \"{{candidateFirstName}}\",\n  \"lastName\": \"{{candidateLastName}}\",\n  \"email\": \"{{candidateEmail}}\",\n  \"phone\": \"{{candidatePhone}}\",\n  \"address\": \"{{candidateAddress}}\",\n  \"dateOfBirth\": \"{{candidateDOB}}\",\n  \"gender\": \"Male\",\n  \"nationality\": \"US\",\n  \"city\": \"{{candidateCity}}\",\n  \"state\": \"{{candidateState}}\",\n  \"country\": \"US\",\n  \"postalCode\": \"{{candidateZip}}\",\n  \"currentSalary\": {{candidateCurrentSalary}},\n  \"expectedSalary\": {{candidateExpectedSalary}},\n  \"noticePeriod\": 30,\n  \"availabilityDate\": \"2024-01-01\",\n  \"status\": \"{{candidateStatus}}\",\n  \"source\": \"Website\",\n  \"vendorId\": \"{{vendorId}}\",\n  \"notes\": \"Experienced developer\"\n}"
+            },
+            "event": [
+              {
+                "listen": "prerequest",
+                "script": {
+                  "exec": [
+                    "// Generate random candidate data",
+                    "function uuidv4() {",
+                    "  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {",
+                    "    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);",
+                    "    return v.toString(16);",
+                    "  });",
+                    "}",
+                    "function randomEmail() {",
+                    "  const domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'example.com'];",
+                    "  const names = ['john', 'jane', 'mike', 'sarah', 'david', 'emma', 'alex', 'lisa', 'tom', 'anna'];",
+                    "  const randomName = names[Math.floor(Math.random() * names.length)];",
+                    "  const randomNumber = Math.floor(Math.random() * 10000);",
+                    "  const randomDomain = domains[Math.floor(Math.random() * domains.length)];",
+                    "  return `${randomName}${randomNumber}@${randomDomain}`;",
+                    "}",
+                    "function randomPhone() {",
+                    "  const areaCodes = ['212', '415', '310', '312', '404', '305', '702', '602', '713', '214'];",
+                    "  const randomAreaCode = areaCodes[Math.floor(Math.random() * areaCodes.length)];",
+                    "  const randomNumber = Math.floor(1000000 + Math.random() * 9000000);",
+                    "  return `+1-${randomAreaCode}-${randomNumber}`;",
+                    "}",
+                    "function randomDate(start, end) {",
+                    "  const d = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));",
+                    "  return d.toISOString().split('T')[0];",
+                    "}",
+                    "function randomName() {",
+                    "  const firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Emma', 'Alex', 'Lisa', 'Tom', 'Anna', 'James', 'Mary', 'Robert', 'Patricia', 'William', 'Jennifer', 'Richard', 'Linda', 'Joseph', 'Elizabeth'];",
+                    "  const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin'];",
+                    "  return {",
+                    "    firstName: firstNames[Math.floor(Math.random() * firstNames.length)],",
+                    "    lastName: lastNames[Math.floor(Math.random() * lastNames.length)]",
+                    "  };",
+                    "}",
+                    "function randomAddress() {",
+                    "  const streets = ['Main St', 'Oak Ave', 'Pine Rd', 'Elm St', 'Cedar Ln', 'Maple Dr', 'Washington Blvd', 'Park Ave', 'Broadway', '5th Ave'];",
+                    "  const cities = ['New York', 'San Francisco', 'Los Angeles', 'Chicago', 'Boston', 'Seattle', 'Austin', 'Denver', 'Miami', 'Atlanta'];",
+                    "  const states = ['NY', 'CA', 'TX', 'IL', 'MA', 'WA', 'CO', 'FL', 'GA', 'PA'];",
+                    "  const randomStreet = streets[Math.floor(Math.random() * streets.length)];",
+                    "  const randomCity = cities[Math.floor(Math.random() * cities.length)];",
+                    "  const randomState = states[Math.floor(Math.random() * states.length)];",
+                    "  const randomNumber = Math.floor(100 + Math.random() * 900);",
+                    "  const randomZip = Math.floor(10000 + Math.random() * 90000);",
+                    "  return {",
+                    "    street: `${randomNumber} ${randomStreet}`,",
+                    "    city: randomCity,",
+                    "    state: randomState,",
+                    "    zip: randomZip.toString()",
+                    "  };",
+                    "}",
+                    "function randomSalary() {",
+                    "  return Math.floor(50000 + Math.random() * 150000);",
+                    "}",
+                    "const candidateName = randomName();",
+                    "const candidateAddress = randomAddress();",
+                    "pm.collectionVariables.set('candidateEmail', randomEmail());",
+                    "pm.collectionVariables.set('candidateFirstName', candidateName.firstName);",
+                    "pm.collectionVariables.set('candidateLastName', candidateName.lastName);",
+                    "pm.collectionVariables.set('candidatePhone', randomPhone());",
+                    "pm.collectionVariables.set('candidateDOB', randomDate(new Date(1980,0,1), new Date(2000,0,1)));",
+                    "pm.collectionVariables.set('candidateStatus', 'Active');",
+                    "pm.collectionVariables.set('candidateAddress', candidateAddress.street);",
+                    "pm.collectionVariables.set('candidateCity', candidateAddress.city);",
+                    "pm.collectionVariables.set('candidateState', candidateAddress.state);",
+                    "pm.collectionVariables.set('candidateZip', candidateAddress.zip);",
+                    "pm.collectionVariables.set('candidateCurrentSalary', randomSalary());",
+                    "pm.collectionVariables.set('candidateExpectedSalary', randomSalary());"
+                  ],
+                  "type": "text/javascript"
+                }
+              },
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "// Capture candidateId from Location header or response body",
+                    "let location = pm.response.headers.get('Location');",
+                    "if (location) {",
+                    "  let candidateId = location.split('/').pop();",
+                    "  pm.collectionVariables.set('candidateId', candidateId);",
+                    "  console.log('Set candidateId from Location header:', candidateId);",
+                    "}",
+                    "try {",
+                    "  let json = pm.response.json();",
+                    "  if (json.candidateId) {",
+                    "    pm.collectionVariables.set('candidateId', json.candidateId);",
+                    "    console.log('Set candidateId from response body:', json.candidateId);",
+                    "  }",
+                    "} catch (e) {",
+                    "  console.log('Error parsing response:', e);",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Positions",
+          "item": [
+            {
+              "name": "{positionId}",
+              "item": [
+                {
+                  "name": "Get Position by ID",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/positions/{{positionId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Update Position",
+                  "request": {
+                    "method": "PUT",
+                    "url": {
+                      "raw": "{{baseUrl}}/positions/{{positionId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Delete Position",
+                  "request": {
+                    "method": "DELETE",
+                    "url": {
+                      "raw": "{{baseUrl}}/positions/{{positionId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "statuses",
+                  "item": [
+                    {
+                      "name": "Get Position Statuses",
+                      "request": {
+                        "method": "GET",
+                        "url": {
+                          "raw": "{{baseUrl}}/positions/{{positionId}}/statuses"
+                        }
+                      }
+                    },
+                    {
+                      "name": "Create Position Status",
+                      "request": {
+                        "method": "POST",
+                        "url": {
+                          "raw": "{{baseUrl}}/positions/{{positionId}}/statuses"
+                        }
+                      }
+                    },
+                    {
+                      "name": "{positionStatusId}",
+                      "item": [
+                        {
+                          "name": "Get Position Status by ID",
+                          "request": {
+                            "method": "GET",
+                            "url": {
+                              "raw": "{{baseUrl}}/positions/{{positionId}}/statuses/{{positionStatusId}}"
+                            }
+                          }
+                        },
+                        {
+                          "name": "Update Position Status",
+                          "request": {
+                            "method": "PUT",
+                            "url": {
+                              "raw": "{{baseUrl}}/positions/{{positionId}}/statuses/{{positionStatusId}}"
+                            }
+                          }
+                        },
+                        {
+                          "name": "Delete Position Status",
+                          "request": {
+                            "method": "DELETE",
+                            "url": {
+                              "raw": "{{baseUrl}}/positions/{{positionId}}/statuses/{{positionStatusId}}"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Get All Positions",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/positions"
+                }
+              }
+            },
+            {
+              "name": "Create Position",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/positions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "positions"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"organizationId\": \"{{organizationId}}\",\n  \"title\": \"{{positionTitle}}\",\n  \"description\": \"{{positionDescription}}\",\n  \"department\": \"{{positionDepartment}}\",\n  \"location\": \"{{positionLocation}}\",\n  \"type\": \"{{positionType}}\",\n  \"status\": \"{{positionStatus}}\",\n  \"minSalary\": {{positionMinSalary}},\n  \"maxSalary\": {{positionMaxSalary}},\n  \"requirements\": \"{{positionRequirements}}\",\n  \"responsibilities\": \"{{positionResponsibilities}}\",\n  \"hiringManager\": \"{{positionHiringManager}}\",\n  \"openPositions\": {{positionOpenPositions}},\n  \"experienceLevel\": \"{{positionExperienceLevel}}\",\n  \"educationLevel\": \"{{positionEducationLevel}}\",\n  \"skills\": [\"{{positionSkills}}\"],\n  \"benefits\": \"{{positionBenefits}}\",\n  \"startDate\": \"{{positionStartDate}}\",\n  \"endDate\": \"{{positionEndDate}}\"\n}"
+                },
+                "event": [
+                  {
+                    "listen": "prerequest",
+                    "script": {
+                      "exec": [
+                        "// Generate random position data",
+                        "function randomJobTitle() {",
+                        "  const titles = ['Senior Software Engineer', 'Full Stack Developer', 'Data Scientist', 'Product Manager', 'DevOps Engineer', 'Frontend Developer', 'Backend Developer', 'QA Engineer', 'System Administrator', 'UI/UX Designer', 'Project Manager', 'Business Analyst', 'Data Engineer', 'Cloud Architect', 'Security Engineer'];",
+                        "  return titles[Math.floor(Math.random() * titles.length)];",
+                        "}",
+                        "function randomDepartment() {",
+                        "  const departments = ['Engineering', 'Product', 'Sales', 'Marketing', 'Finance', 'HR', 'Operations', 'Legal', 'Customer Success', 'Research & Development'];",
+                        "  return departments[Math.floor(Math.random() * departments.length)];",
+                        "}",
+                        "function randomLocation() {",
+                        "  const locations = ['New York, NY', 'San Francisco, CA', 'Los Angeles, CA', 'Chicago, IL', 'Boston, MA', 'Seattle, WA', 'Austin, TX', 'Denver, CO', 'Miami, FL', 'Atlanta, GA'];",
+                        "  return locations[Math.floor(Math.random() * locations.length)];",
+                        "}",
+                        "function randomJobType() {",
+                        "  const types = ['Full-time', 'Part-time', 'Contract', 'Internship', 'Temporary'];",
+                        "  return types[Math.floor(Math.random() * types.length)];",
+                        "}",
+                        "function randomExperienceLevel() {",
+                        "  const levels = ['Entry', 'Mid-level', 'Senior', 'Lead', 'Principal', 'Executive'];",
+                        "  return levels[Math.floor(Math.random() * levels.length)];",
+                        "}",
+                        "function randomEducationLevel() {",
+                        "  const levels = ['High School', 'Associate', 'Bachelor', 'Master', 'PhD'];",
+                        "  return levels[Math.floor(Math.random() * levels.length)];",
+                        "}",
+                        "function randomSkills() {",
+                        "  const skills = ['Java', 'Python', 'JavaScript', 'React', 'Angular', 'Node.js', 'Spring Boot', 'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'SQL', 'MongoDB', 'Redis', 'Kafka', 'REST API', 'GraphQL', 'Microservices', 'CI/CD'];",
+                        "  const numSkills = Math.floor(Math.random() * 5) + 2;",
+                        "  const selectedSkills = [];",
+                        "  for (let i = 0; i < numSkills; i++) {",
+                        "    const skill = skills[Math.floor(Math.random() * skills.length)];",
+                        "    if (!selectedSkills.includes(skill)) {",
+                        "      selectedSkills.push(skill);",
+                        "    }",
+                        "  }",
+                        "  return selectedSkills.join(',');",
+                        "}",
+                        "function randomSalary() {",
+                        "  return Math.floor(50000 + Math.random() * 150000);",
+                        "}",
+                        "function randomDate(start, end) {",
+                        "  const d = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));",
+                        "  return d.toISOString().split('T')[0];",
+                        "}",
+                        "const positionTitle = randomJobTitle();",
+                        "const positionDepartment = randomDepartment();",
+                        "const positionLocation = randomLocation();",
+                        "const positionType = randomJobType();",
+                        "const positionStatus = 'Active';",
+                        "const positionMinSalary = randomSalary();",
+                        "const positionMaxSalary = positionMinSalary + Math.floor(Math.random() * 50000) + 10000;",
+                        "const positionExperienceLevel = randomExperienceLevel();",
+                        "const positionEducationLevel = randomEducationLevel();",
+                        "const positionSkills = randomSkills();",
+                        "const positionOpenPositions = Math.floor(Math.random() * 5) + 1;",
+                        "pm.collectionVariables.set('positionTitle', positionTitle);",
+                        "pm.collectionVariables.set('positionDescription', `We are looking for a ${positionTitle} to join our ${positionDepartment} team. This role will be responsible for developing and maintaining high-quality software solutions.`);",
+                        "pm.collectionVariables.set('positionDepartment', positionDepartment);",
+                        "pm.collectionVariables.set('positionLocation', positionLocation);",
+                        "pm.collectionVariables.set('positionType', positionType);",
+                        "pm.collectionVariables.set('positionStatus', positionStatus);",
+                        "pm.collectionVariables.set('positionMinSalary', positionMinSalary);",
+                        "pm.collectionVariables.set('positionMaxSalary', positionMaxSalary);",
+                        "pm.collectionVariables.set('positionRequirements', 'Strong problem-solving skills, excellent communication, team player, 3+ years of experience');",
+                        "pm.collectionVariables.set('positionResponsibilities', 'Design and implement software solutions, collaborate with cross-functional teams, mentor junior developers');",
+                        "pm.collectionVariables.set('positionHiringManager', 'John Smith');",
+                        "pm.collectionVariables.set('positionOpenPositions', positionOpenPositions);",
+                        "pm.collectionVariables.set('positionExperienceLevel', positionExperienceLevel);",
+                        "pm.collectionVariables.set('positionEducationLevel', positionEducationLevel);",
+                        "pm.collectionVariables.set('positionSkills', positionSkills);",
+                        "pm.collectionVariables.set('positionBenefits', 'Health insurance, 401k, flexible PTO, remote work options');",
+                        "pm.collectionVariables.set('positionStartDate', randomDate(new Date(2024,0,1), new Date(2024,5,30)));",
+                        "pm.collectionVariables.set('positionEndDate', randomDate(new Date(2024,6,1), new Date(2024,11,31)));"
+                      ],
+                      "type": "text/javascript"
+                    }
+                  },
+                  {
+                    "listen": "test",
+                    "script": {
+                      "exec": [
+                        "// Capture positionId from Location header or response body",
+                        "let location = pm.response.headers.get('Location');",
+                        "if (location) {",
+                        "  let positionId = location.split('/').pop();",
+                        "  pm.collectionVariables.set('positionId', positionId);",
+                        "  console.log('Set positionId from Location header:', positionId);",
+                        "}",
+                        "try {",
+                        "  let json = pm.response.json();",
+                        "  if (json.positionId) {",
+                        "    pm.collectionVariables.set('positionId', json.positionId);",
+                        "    console.log('Set positionId from response body:', json.positionId);",
+                        "  }",
+                        "} catch (e) {",
+                        "  console.log('Error parsing response:', e);",
+                        "}"
+                      ],
+                      "type": "text/javascript"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Search Positions",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/positions/search"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Applications",
+          "item": [
+            {
+              "name": "{applicationId}",
+              "item": [
+                {
+                  "name": "Get Application by ID",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/applications/{{applicationId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Update Application",
+                  "request": {
+                    "method": "PUT",
+                    "url": {
+                      "raw": "{{baseUrl}}/applications/{{applicationId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Delete Application",
+                  "request": {
+                    "method": "DELETE",
+                    "url": {
+                      "raw": "{{baseUrl}}/applications/{{applicationId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "statuses",
+                  "item": [
+                    {
+                      "name": "Get Application Statuses",
+                      "request": {
+                        "method": "GET",
+                        "url": {
+                          "raw": "{{baseUrl}}/applications/{{applicationId}}/statuses"
+                        }
+                      }
+                    },
+                    {
+                      "name": "Create Application Status",
+                      "request": {
+                        "method": "POST",
+                        "url": {
+                          "raw": "{{baseUrl}}/applications/{{applicationId}}/statuses"
+                        }
+                      }
+                    },
+                    {
+                      "name": "{applicationStatusId}",
+                      "item": [
+                        {
+                          "name": "Get Application Status by ID",
+                          "request": {
+                            "method": "GET",
+                            "url": {
+                              "raw": "{{baseUrl}}/applications/{{applicationId}}/statuses/{{applicationStatusId}}"
+                            }
+                          }
+                        },
+                        {
+                          "name": "Update Application Status",
+                          "request": {
+                            "method": "PUT",
+                            "url": {
+                              "raw": "{{baseUrl}}/applications/{{applicationId}}/statuses/{{applicationStatusId}}"
+                            }
+                          }
+                        },
+                        {
+                          "name": "Delete Application Status",
+                          "request": {
+                            "method": "DELETE",
+                            "url": {
+                              "raw": "{{baseUrl}}/applications/{{applicationId}}/statuses/{{applicationStatusId}}"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Get All Applications",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/applications"
+                }
+              }
+            },
+            {
+              "name": "Create Application",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/applications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "applications"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"organizationId\": \"{{organizationId}}\",\n  \"candidateId\": \"{{candidateId}}\",\n  \"positionId\": \"{{positionId}}\",\n  \"status\": \"{{applicationStatus}}\",\n  \"applicationDate\": \"{{applicationDate}}\",\n  \"source\": \"{{applicationSource}}\",\n  \"coverLetter\": \"{{applicationCoverLetter}}\",\n  \"resumeUrl\": \"{{applicationResumeUrl}}\",\n  \"portfolioUrl\": \"{{applicationPortfolioUrl}}\",\n  \"linkedinUrl\": \"{{applicationLinkedinUrl}}\",\n  \"expectedSalary\": {{applicationExpectedSalary}},\n  \"availabilityDate\": \"{{applicationAvailabilityDate}}\",\n  \"relocationWilling\": {{applicationRelocationWilling}},\n  \"remoteWorkWilling\": {{applicationRemoteWorkWilling}},\n  \"notes\": \"{{applicationNotes}}\",\n  \"referralSource\": \"{{applicationReferralSource}}\",\n  \"referralName\": \"{{applicationReferralName}}\",\n  \"referralEmail\": \"{{applicationReferralEmail}}\",\n  \"referralPhone\": \"{{applicationReferralPhone}}\"\n}"
+                },
+                "event": [
+                  {
+                    "listen": "prerequest",
+                    "script": {
+                      "exec": [
+                        "// Generate random application data",
+                        "function randomApplicationSource() {",
+                        "  const sources = ['Website', 'LinkedIn', 'Indeed', 'Glassdoor', 'Referral', 'Job Board', 'Career Fair', 'University', 'Agency', 'Social Media'];",
+                        "  return sources[Math.floor(Math.random() * sources.length)];",
+                        "}",
+                        "function randomApplicationStatus() {",
+                        "  const statuses = ['Applied', 'Under Review', 'Interview Scheduled', 'Interviewed', 'Shortlisted', 'Offer Extended', 'Hired', 'Rejected', 'Withdrawn'];",
+                        "  return statuses[Math.floor(Math.random() * statuses.length)];",
+                        "}",
+                        "function randomDate(start, end) {",
+                        "  const d = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));",
+                        "  return d.toISOString().split('T')[0];",
+                        "}",
+                        "function randomSalary() {",
+                        "  return Math.floor(50000 + Math.random() * 150000);",
+                        "}",
+                        "function randomBoolean() {",
+                        "  return Math.random() > 0.5;",
+                        "}",
+                        "function randomReferralSource() {",
+                        "  const sources = ['Employee', 'Former Employee', 'Client', 'Partner', 'University', 'Professional Network', 'None'];",
+                        "  return sources[Math.floor(Math.random() * sources.length)];",
+                        "}",
+                        "const applicationSource = randomApplicationSource();",
+                        "const applicationStatus = randomApplicationStatus();",
+                        "const applicationDate = randomDate(new Date(2024,0,1), new Date(2024,11,31));",
+                        "const applicationExpectedSalary = randomSalary();",
+                        "const applicationAvailabilityDate = randomDate(new Date(2024,0,1), new Date(2024,5,30));",
+                        "const applicationRelocationWilling = randomBoolean();",
+                        "const applicationRemoteWorkWilling = randomBoolean();",
+                        "const applicationReferralSource = randomReferralSource();",
+                        "pm.collectionVariables.set('applicationStatus', applicationStatus);",
+                        "pm.collectionVariables.set('applicationDate', applicationDate);",
+                        "pm.collectionVariables.set('applicationSource', applicationSource);",
+                        "pm.collectionVariables.set('applicationCoverLetter', 'I am excited to apply for this position. With my experience and skills, I believe I would be a great fit for your team. I am passionate about technology and innovation, and I am looking forward to contributing to your company\\'s success.');",
+                        "pm.collectionVariables.set('applicationResumeUrl', 'https://example.com/resume.pdf');",
+                        "pm.collectionVariables.set('applicationPortfolioUrl', 'https://example.com/portfolio');",
+                        "pm.collectionVariables.set('applicationLinkedinUrl', 'https://linkedin.com/in/example');",
+                        "pm.collectionVariables.set('applicationExpectedSalary', applicationExpectedSalary);",
+                        "pm.collectionVariables.set('applicationAvailabilityDate', applicationAvailabilityDate);",
+                        "pm.collectionVariables.set('applicationRelocationWilling', applicationRelocationWilling);",
+                        "pm.collectionVariables.set('applicationRemoteWorkWilling', applicationRemoteWorkWilling);",
+                        "pm.collectionVariables.set('applicationNotes', 'Strong technical background with excellent communication skills. Previous experience in similar roles.');",
+                        "pm.collectionVariables.set('applicationReferralSource', applicationReferralSource);",
+                        "pm.collectionVariables.set('applicationReferralName', applicationReferralSource !== 'None' ? 'John Doe' : '');",
+                        "pm.collectionVariables.set('applicationReferralEmail', applicationReferralSource !== 'None' ? 'john.doe@example.com' : '');",
+                        "pm.collectionVariables.set('applicationReferralPhone', applicationReferralSource !== 'None' ? '+1-555-123-4567' : '');"
+                      ],
+                      "type": "text/javascript"
+                    }
+                  },
+                  {
+                    "listen": "test",
+                    "script": {
+                      "exec": [
+                        "// Capture applicationId from Location header or response body",
+                        "let location = pm.response.headers.get('Location');",
+                        "if (location) {",
+                        "  let applicationId = location.split('/').pop();",
+                        "  pm.collectionVariables.set('applicationId', applicationId);",
+                        "  console.log('Set applicationId from Location header:', applicationId);",
+                        "}",
+                        "try {",
+                        "  let json = pm.response.json();",
+                        "  if (json.applicationId) {",
+                        "    pm.collectionVariables.set('applicationId', json.applicationId);",
+                        "    console.log('Set applicationId from response body:', json.applicationId);",
+                        "  }",
+                        "} catch (e) {",
+                        "  console.log('Error parsing response:', e);",
+                        "}"
+                      ],
+                      "type": "text/javascript"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Search Applications",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/applications/search"
+                }
+              }
+            },
+            {
+              "name": "Get Applications by Candidate",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/applications/candidate/{{candidateId}}"
+                }
+              }
+            },
+            {
+              "name": "Get Applications by Position",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/applications/position/{{positionId}}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Job Requisitions",
+          "item": [
+            {
+              "name": "{jobRequisitionId}",
+              "item": [
+                {
+                  "name": "Get Job Requisition by ID",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/job-requisitions/{{jobRequisitionId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Update Job Requisition",
+                  "request": {
+                    "method": "PUT",
+                    "url": {
+                      "raw": "{{baseUrl}}/job-requisitions/{{jobRequisitionId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Delete Job Requisition",
+                  "request": {
+                    "method": "DELETE",
+                    "url": {
+                      "raw": "{{baseUrl}}/job-requisitions/{{jobRequisitionId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "statuses",
+                  "item": [
+                    {
+                      "name": "Get Job Requisition Statuses",
+                      "request": {
+                        "method": "GET",
+                        "url": {
+                          "raw": "{{baseUrl}}/job-requisitions/{{jobRequisitionId}}/statuses"
+                        }
+                      }
+                    },
+                    {
+                      "name": "Create Job Requisition Status",
+                      "request": {
+                        "method": "POST",
+                        "url": {
+                          "raw": "{{baseUrl}}/job-requisitions/{{jobRequisitionId}}/statuses"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Get All Job Requisitions",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/job-requisitions"
+                }
+              }
+            },
+            {
+              "name": "Create Job Requisition",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/job-requisitions"
+                }
+              }
+            },
+            {
+              "name": "Search Job Requisitions",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/job-requisitions/search"
+                }
+              }
+            },
+            {
+              "name": "Get Job Requisitions by Department",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/job-requisitions/department/{{department}}"
+                }
+              }
+            },
+            {
+              "name": "Get Job Requisitions by Status",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/job-requisitions/status/{{status}}"
+                }
+              }
+            },
+            {
+              "name": "Get Job Requisitions by Hiring Manager",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/job-requisitions/hiring-manager/{{hiringManager}}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Organizations",
+          "item": [
+            {
+              "name": "{organizationId}",
+              "item": [
+                {
+                  "name": "Get Organization by ID",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/organizations/{{organizationId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Update Organization",
+                  "request": {
+                    "method": "PUT",
+                    "url": {
+                      "raw": "{{baseUrl}}/organizations/{{organizationId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Delete Organization",
+                  "request": {
+                    "method": "DELETE",
+                    "url": {
+                      "raw": "{{baseUrl}}/organizations/{{organizationId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "departments",
+                  "item": [
+                    {
+                      "name": "Get Organization Departments",
+                      "request": {
+                        "method": "GET",
+                        "url": {
+                          "raw": "{{baseUrl}}/organizations/{{organizationId}}/departments"
+                        }
+                      }
+                    },
+                    {
+                      "name": "Create Organization Department",
+                      "request": {
+                        "method": "POST",
+                        "url": {
+                          "raw": "{{baseUrl}}/organizations/{{organizationId}}/departments"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Get All Organizations",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/organizations"
+                }
+              }
+            },
+            {
+              "name": "Create Organization",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/organizations"
+                }
+              }
+            },
+            {
+              "name": "Search Organizations",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/organizations/search"
+                }
+              }
+            },
+            {
+              "name": "Get Organizations by Industry",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/organizations/industry/{{industry}}"
+                }
+              }
+            },
+            {
+              "name": "Get Organizations by Size",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/organizations/size/{{size}}"
+                }
+              }
+            },
+            {
+              "name": "Get Organizations by Status",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/organizations/status/{{status}}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vendors",
+          "item": [
+            {
+              "name": "{vendorId}",
+              "item": [
+                {
+                  "name": "Get Vendor by ID",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/vendors/{{vendorId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Update Vendor",
+                  "request": {
+                    "method": "PUT",
+                    "url": {
+                      "raw": "{{baseUrl}}/vendors/{{vendorId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Delete Vendor",
+                  "request": {
+                    "method": "DELETE",
+                    "url": {
+                      "raw": "{{baseUrl}}/vendors/{{vendorId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "candidates",
+                  "item": [
+                    {
+                      "name": "Get Vendor Candidates",
+                      "request": {
+                        "method": "GET",
+                        "url": {
+                          "raw": "{{baseUrl}}/vendors/{{vendorId}}/candidates"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "performance",
+                  "item": [
+                    {
+                      "name": "Get Vendor Performance",
+                      "request": {
+                        "method": "GET",
+                        "url": {
+                          "raw": "{{baseUrl}}/vendors/{{vendorId}}/performance"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "contracts",
+                  "item": [
+                    {
+                      "name": "Get Vendor Contracts",
+                      "request": {
+                        "method": "GET",
+                        "url": {
+                          "raw": "{{baseUrl}}/vendors/{{vendorId}}/contracts"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Get All Vendors",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/vendors"
+                }
+              }
+            },
+            {
+              "name": "Create Vendor",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/vendors",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vendors"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"organizationId\": \"{{organizationId}}\",\n  \"name\": \"{{vendorName}}\",\n  \"email\": \"{{vendorEmail}}\",\n  \"phone\": \"{{vendorPhone}}\",\n  \"address\": \"{{vendorAddress}}\",\n  \"city\": \"{{vendorCity}}\",\n  \"state\": \"{{vendorState}}\",\n  \"country\": \"US\",\n  \"postalCode\": \"{{vendorZip}}\",\n  \"website\": \"{{vendorWebsite}}\",\n  \"type\": \"{{vendorType}}\",\n  \"specialization\": \"{{vendorSpecialization}}\",\n  \"status\": \"{{vendorStatus}}\",\n  \"contactPerson\": \"{{vendorContactPerson}}\",\n  \"contactEmail\": \"{{vendorContactEmail}}\",\n  \"contactPhone\": \"{{vendorContactPhone}}\",\n  \"taxId\": \"{{vendorTaxId}}\",\n  \"contractStartDate\": \"{{vendorContractStartDate}}\",\n  \"contractEndDate\": \"{{vendorContractEndDate}}\",\n  \"paymentTerms\": \"{{vendorPaymentTerms}}\",\n  \"rate\": {{vendorRate}},\n  \"notes\": \"{{vendorNotes}}\",\n  \"rating\": {{vendorRating}},\n  \"totalCandidates\": {{vendorTotalCandidates}},\n  \"successfulPlacements\": {{vendorSuccessfulPlacements}}\n}"
+                },
+                "event": [
+                  {
+                    "listen": "prerequest",
+                    "script": {
+                      "exec": [
+                        "// Generate random vendor data",
+                        "function randomCompanyName() {",
+                        "  const prefixes = ['Tech', 'Global', 'Innovative', 'Advanced', 'Smart', 'Digital', 'Future', 'Next', 'Elite', 'Prime', 'Strategic', 'Professional', 'Expert', 'Premier', 'Dynamic'];",
+                        "  const suffixes = ['Solutions', 'Systems', 'Technologies', 'Corp', 'Inc', 'Labs', 'Group', 'Partners', 'Enterprises', 'Services', 'Consulting', 'Staffing', 'Recruitment', 'Talent', 'Resources'];",
+                        "  const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];",
+                        "  const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];",
+                        "  return `${randomPrefix} ${randomSuffix}`;",
+                        "}",
+                        "function randomEmail() {",
+                        "  const domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'example.com'];",
+                        "  const names = ['john', 'jane', 'mike', 'sarah', 'david', 'emma', 'alex', 'lisa', 'tom', 'anna'];",
+                        "  const randomName = names[Math.floor(Math.random() * names.length)];",
+                        "  const randomNumber = Math.floor(Math.random() * 10000);",
+                        "  const randomDomain = domains[Math.floor(Math.random() * domains.length)];",
+                        "  return `${randomName}${randomNumber}@${randomDomain}`;",
+                        "}",
+                        "function randomPhone() {",
+                        "  const areaCodes = ['212', '415', '310', '312', '404', '305', '702', '602', '713', '214'];",
+                        "  const randomAreaCode = areaCodes[Math.floor(Math.random() * areaCodes.length)];",
+                        "  const randomNumber = Math.floor(1000000 + Math.random() * 9000000);",
+                        "  return `+1-${randomAreaCode}-${randomNumber}`;",
+                        "}",
+                        "function randomAddress() {",
+                        "  const streets = ['Main St', 'Oak Ave', 'Pine Rd', 'Elm St', 'Cedar Ln', 'Maple Dr', 'Washington Blvd', 'Park Ave', 'Broadway', '5th Ave'];",
+                        "  const cities = ['New York', 'San Francisco', 'Los Angeles', 'Chicago', 'Boston', 'Seattle', 'Austin', 'Denver', 'Miami', 'Atlanta'];",
+                        "  const states = ['NY', 'CA', 'TX', 'IL', 'MA', 'WA', 'CO', 'FL', 'GA', 'PA'];",
+                        "  const randomStreet = streets[Math.floor(Math.random() * streets.length)];",
+                        "  const randomCity = cities[Math.floor(Math.random() * cities.length)];",
+                        "  const randomState = states[Math.floor(Math.random() * states.length)];",
+                        "  const randomNumber = Math.floor(100 + Math.random() * 900);",
+                        "  const randomZip = Math.floor(10000 + Math.random() * 90000);",
+                        "  return {",
+                        "    street: `${randomNumber} ${randomStreet}`,",
+                        "    city: randomCity,",
+                        "    state: randomState,",
+                        "    zip: randomZip.toString()",
+                        "  };",
+                        "}",
+                        "function randomVendorType() {",
+                        "  const types = ['Staffing Agency', 'Recruitment Firm', 'Consulting Company', 'Technology Partner', 'Outsourcing Provider', 'Temporary Agency', 'Executive Search', 'Contractor Network', 'Freelance Platform', 'Professional Services'];",
+                        "  return types[Math.floor(Math.random() * types.length)];",
+                        "}",
+                        "function randomVendorSpecialization() {",
+                        "  const specializations = ['IT & Technology', 'Engineering', 'Finance & Accounting', 'Healthcare', 'Sales & Marketing', 'Administrative', 'Legal', 'Creative & Design', 'Manufacturing', 'Logistics', 'Education', 'Non-profit'];",
+                        "  return specializations[Math.floor(Math.random() * specializations.length)];",
+                        "}",
+                        "function randomDate(start, end) {",
+                        "  const d = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));",
+                        "  return d.toISOString().split('T')[0];",
+                        "}",
+                        "function randomRate() {",
+                        "  return Math.floor(50 + Math.random() * 200);",
+                        "}",
+                        "function randomRating() {",
+                        "  return Math.floor(1 + Math.random() * 5);",
+                        "}",
+                        "function randomNumber(min, max) {",
+                        "  return Math.floor(min + Math.random() * (max - min + 1));",
+                        "}",
+                        "const vendorCompany = randomCompanyName();",
+                        "const vendorAddress = randomAddress();",
+                        "const vendorType = randomVendorType();",
+                        "const vendorSpecialization = randomVendorSpecialization();",
+                        "const vendorStatus = 'Active';",
+                        "const vendorRate = randomRate();",
+                        "const vendorRating = randomRating();",
+                        "const vendorTotalCandidates = randomNumber(10, 1000);",
+                        "const vendorSuccessfulPlacements = randomNumber(5, vendorTotalCandidates);",
+                        "pm.collectionVariables.set('vendorName', vendorCompany);",
+                        "pm.collectionVariables.set('vendorEmail', randomEmail());",
+                        "pm.collectionVariables.set('vendorPhone', randomPhone());",
+                        "pm.collectionVariables.set('vendorAddress', vendorAddress.street);",
+                        "pm.collectionVariables.set('vendorCity', vendorAddress.city);",
+                        "pm.collectionVariables.set('vendorState', vendorAddress.state);",
+                        "pm.collectionVariables.set('vendorZip', vendorAddress.zip);",
+                        "pm.collectionVariables.set('vendorWebsite', `https://www.${vendorCompany.toLowerCase().replace(/\\s+/g, '')}.com`);",
+                        "pm.collectionVariables.set('vendorType', vendorType);",
+                        "pm.collectionVariables.set('vendorSpecialization', vendorSpecialization);",
+                        "pm.collectionVariables.set('vendorStatus', vendorStatus);",
+                        "pm.collectionVariables.set('vendorContactPerson', 'John Smith');",
+                        "pm.collectionVariables.set('vendorContactEmail', randomEmail());",
+                        "pm.collectionVariables.set('vendorContactPhone', randomPhone());",
+                        "pm.collectionVariables.set('vendorTaxId', `${Math.floor(Math.random() * 999999999)}`);",
+                        "pm.collectionVariables.set('vendorContractStartDate', randomDate(new Date(2024,0,1), new Date(2024,5,30)));",
+                        "pm.collectionVariables.set('vendorContractEndDate', randomDate(new Date(2024,6,1), new Date(2024,11,31)));",
+                        "pm.collectionVariables.set('vendorPaymentTerms', 'Net 30');",
+                        "pm.collectionVariables.set('vendorRate', vendorRate);",
+                        "pm.collectionVariables.set('vendorNotes', 'Reliable vendor with excellent track record. Strong candidate pool and quick response times.');",
+                        "pm.collectionVariables.set('vendorRating', vendorRating);",
+                        "pm.collectionVariables.set('vendorTotalCandidates', vendorTotalCandidates);",
+                        "pm.collectionVariables.set('vendorSuccessfulPlacements', vendorSuccessfulPlacements);"
+                      ],
+                      "type": "text/javascript"
+                    }
+                  },
+                  {
+                    "listen": "test",
+                    "script": {
+                      "exec": [
+                        "// Capture vendorId from Location header or response body",
+                        "let location = pm.response.headers.get('Location');",
+                        "if (location) {",
+                        "  let vendorId = location.split('/').pop();",
+                        "  pm.collectionVariables.set('vendorId', vendorId);",
+                        "  console.log('Set vendorId from Location header:', vendorId);",
+                        "}",
+                        "try {",
+                        "  let json = pm.response.json();",
+                        "  if (json.vendorId) {",
+                        "    pm.collectionVariables.set('vendorId', json.vendorId);",
+                        "    console.log('Set vendorId from response body:', json.vendorId);",
+                        "  }",
+                        "} catch (e) {",
+                        "  console.log('Error parsing response:', e);",
+                        "}"
+                      ],
+                      "type": "text/javascript"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Search Vendors",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/vendors/search"
+                }
+              }
+            },
+            {
+              "name": "Get Vendors by Type",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/vendors/type/{{type}}"
+                }
+              }
+            },
+            {
+              "name": "Get Vendors by Specialization",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/vendors/specialization/{{specialization}}"
+                }
+              }
+            },
+            {
+              "name": "Get Vendors by Status",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/vendors/status/{{status}}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tenants",
+          "item": [
+            {
+              "name": "{tenantId}",
+              "item": [
+                {
+                  "name": "Get Tenant by ID",
+                  "request": {
+                    "method": "GET",
+                    "url": {
+                      "raw": "{{baseUrl}}/tenants/{{tenantId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Update Tenant",
+                  "request": {
+                    "method": "PUT",
+                    "url": {
+                      "raw": "{{baseUrl}}/tenants/{{tenantId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "Delete Tenant",
+                  "request": {
+                    "method": "DELETE",
+                    "url": {
+                      "raw": "{{baseUrl}}/tenants/{{tenantId}}"
+                    }
+                  }
+                },
+                {
+                  "name": "usage",
+                  "item": [
+                    {
+                      "name": "Get Tenant Usage Statistics",
+                      "request": {
+                        "method": "GET",
+                        "url": {
+                          "raw": "{{baseUrl}}/tenants/{{tenantId}}/usage"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "organizations",
+                  "item": [
+                    {
+                      "name": "Get Tenant Organizations",
+                      "request": {
+                        "method": "GET",
+                        "url": {
+                          "raw": "{{baseUrl}}/tenants/{{tenantId}}/organizations"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "users",
+                  "item": [
+                    {
+                      "name": "Get Tenant Users",
+                      "request": {
+                        "method": "GET",
+                        "url": {
+                          "raw": "{{baseUrl}}/tenants/{{tenantId}}/users"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "settings",
+                  "item": [
+                    {
+                      "name": "Get Tenant Settings",
+                      "request": {
+                        "method": "GET",
+                        "url": {
+                          "raw": "{{baseUrl}}/tenants/{{tenantId}}/settings"
+                        }
+                      }
+                    },
+                    {
+                      "name": "Update Tenant Settings",
+                      "request": {
+                        "method": "PUT",
+                        "url": {
+                          "raw": "{{baseUrl}}/tenants/{{tenantId}}/settings"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Get All Tenants",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/tenants"
+                }
+              }
+            },
+            {
+              "name": "Create Tenant",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/tenants"
+                }
+              }
+            },
+            {
+              "name": "Search Tenants",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/tenants/search"
+                }
+              }
+            },
+            {
+              "name": "Get Tenants by Status",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/tenants/status/{{status}}"
+                }
+              }
+            },
+            {
+              "name": "Get Tenants by Subscription Plan",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/tenants/subscription-plan/{{plan}}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Health",
+          "item": [
+            {
+              "name": "Health Check",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/health"
+                }
+              }
+            },
+            {
+              "name": "Health Check with Details",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/health/details"
+                }
+              }
+            },
+            {
+              "name": "Health Check Readiness",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/health/ready"
+                }
+              }
+            },
+            {
+              "name": "Health Check Liveness",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/health/live"
+                }
+              }
+            },
+            {
+              "name": "Health Check Info",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/health/info"
+                }
+              }
+            },
+            {
+              "name": "Health Check Metrics",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/health/metrics"
+                }
+              }
+            },
+            {
+              "name": "Health Check Environment",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/health/env"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Core",
+          "item": [
+            {
+              "name": "Get API Information",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/"
+                }
+              }
+            },
+            {
+              "name": "Get API Version",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/version"
+                }
+              }
+            },
+            {
+              "name": "Get API Documentation",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/docs"
+                }
+              }
+            },
+            {
+              "name": "Get OpenAPI Specification",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/openapi.json"
+                }
+              }
+            },
+            {
+              "name": "Get API Status",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/status"
+                }
+              }
+            },
+            {
+              "name": "Get API Configuration",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/config"
+                }
+              }
+            },
+            {
+              "name": "Publish Message",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/publish"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

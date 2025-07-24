@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: position-service-config
+  labels:
+    app: position-service
+data:
+  SAMPLE_PROPERTY: "sample-value" 

@@ -1,0 +1,5090 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "HCM Core Service API",
+    "description": "Core service for Human Capital Management system providing master data management, candidate operations, position management, and application handling.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "HCM Development Team",
+      "email": "hcm-dev@stl.tech"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:9112/api/v1",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://hcm-core.stl.tech/api/v1",
+      "description": "Production Server"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token for authentication"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Error timestamp"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "path": {
+            "type": "string",
+            "description": "Request path"
+          }
+        }
+      },
+      "PaginatedResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "List of items"
+          },
+          "pageable": {
+            "type": "object",
+            "properties": {
+              "pageNumber": {
+                "type": "integer",
+                "description": "Current page number (0-based)"
+              },
+              "pageSize": {
+                "type": "integer",
+                "description": "Number of items per page"
+              },
+              "sort": {
+                "type": "object",
+                "properties": {
+                  "sorted": {
+                    "type": "boolean"
+                  },
+                  "unsorted": {
+                    "type": "boolean"
+                  },
+                  "empty": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "totalElements": {
+            "type": "integer",
+            "description": "Total number of items"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "Total number of pages"
+          },
+          "last": {
+            "type": "boolean",
+            "description": "Whether this is the last page"
+          },
+          "first": {
+            "type": "boolean",
+            "description": "Whether this is the first page"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "description": "Number of elements in current page"
+          },
+          "size": {
+            "type": "integer",
+            "description": "Page size"
+          },
+          "number": {
+            "type": "integer",
+            "description": "Current page number"
+          },
+          "sort": {
+            "type": "object",
+            "properties": {
+              "sorted": {
+                "type": "boolean"
+              },
+              "unsorted": {
+                "type": "boolean"
+              },
+              "empty": {
+                "type": "boolean"
+              }
+            }
+          },
+          "empty": {
+            "type": "boolean",
+            "description": "Whether the page is empty"
+          }
+        }
+      },
+      "DocumentTypeDTO": {
+        "type": "object",
+        "properties": {
+          "typeId": {
+            "type": "integer",
+            "description": "Document type ID"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "typeName": {
+            "type": "string",
+            "description": "Document type name"
+          },
+          "isRequired": {
+            "type": "boolean",
+            "description": "Whether this document type is required"
+          },
+          "description": {
+            "type": "string",
+            "description": "Document type description"
+          }
+        }
+      },
+      "IdTypeDTO": {
+        "type": "object",
+        "properties": {
+          "typeId": {
+            "type": "integer",
+            "description": "ID type ID"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "typeName": {
+            "type": "string",
+            "description": "ID type name"
+          },
+          "isRequired": {
+            "type": "boolean",
+            "description": "Whether this ID type is required"
+          },
+          "description": {
+            "type": "string",
+            "description": "ID type description"
+          }
+        }
+      },
+      "CountryDTO": {
+        "type": "object",
+        "properties": {
+          "countryId": {
+            "type": "integer",
+            "description": "Country ID"
+          },
+          "countryName": {
+            "type": "string",
+            "description": "Country name"
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "Country code (e.g., US, CA)"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the country is active"
+          }
+        }
+      },
+      "StateDTO": {
+        "type": "object",
+        "properties": {
+          "stateId": {
+            "type": "integer",
+            "description": "State ID"
+          },
+          "stateName": {
+            "type": "string",
+            "description": "State name"
+          },
+          "stateCode": {
+            "type": "string",
+            "description": "State code"
+          },
+          "countryId": {
+            "type": "integer",
+            "description": "Country ID"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the state is active"
+          }
+        }
+      },
+      "SkillDTO": {
+        "type": "object",
+        "properties": {
+          "skillId": {
+            "type": "integer",
+            "description": "Skill ID"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization ID"
+          },
+          "skillName": {
+            "type": "string",
+            "description": "Skill name"
+          },
+          "skillCategory": {
+            "type": "string",
+            "description": "Skill category"
+          },
+          "description": {
+            "type": "string",
+            "description": "Skill description"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Created by user ID"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Updated by user ID"
+          }
+        }
+      },
+      "DepartmentDTO": {
+        "type": "object",
+        "properties": {
+          "departmentId": {
+            "type": "integer",
+            "description": "Department ID"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Department name"
+          },
+          "parentDepartmentId": {
+            "type": "integer",
+            "description": "Parent department ID"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Department status ID"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Created by user ID"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Updated by user ID"
+          }
+        }
+      },
+      "UserRoleDTO": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "integer",
+            "description": "Role ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Role name"
+          },
+          "permissions": {
+            "type": "string",
+            "description": "Role permissions (JSON)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Created by user ID"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Updated by user ID"
+          }
+        }
+      },
+      "UserTypeDTO": {
+        "type": "object",
+        "properties": {
+          "typeId": {
+            "type": "integer",
+            "description": "User type ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "User type name"
+          },
+          "description": {
+            "type": "string",
+            "description": "User type description"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Created by user ID"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Updated by user ID"
+          }
+        }
+      },
+      "ApplicationCreateDTO": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "requisitionId": {
+            "type": "integer",
+            "description": "Job requisition ID"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Application status ID"
+          },
+          "appliedDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when application was submitted"
+          },
+          "source": {
+            "type": "string",
+            "description": "Application source (e.g., website, referral, etc.)"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the application"
+          }
+        }
+      },
+      "ApplicationStatusCreateDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Application status name"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the status"
+          }
+        }
+      },
+      "JobRequisitionCreateDTO": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization ID"
+          },
+          "positionId": {
+            "type": "integer",
+            "description": "Position ID"
+          },
+          "departmentId": {
+            "type": "integer",
+            "description": "Department ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Job title"
+          },
+          "location": {
+            "type": "string",
+            "description": "Job location"
+          },
+          "employmentType": {
+            "type": "string",
+            "description": "Employment type (full-time, part-time, contract, etc.)"
+          },
+          "postedDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when job was posted"
+          },
+          "closingDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when job posting closes"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Job requisition status ID"
+          },
+          "hiringManagerId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Hiring manager user ID"
+          },
+          "vendorId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Vendor ID"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the requisition"
+          }
+        }
+      },
+      "OrganizationCreateDTO": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Organization name"
+          },
+          "address": {
+            "type": "string",
+            "description": "Organization address"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Organization status ID"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the organization"
+          }
+        }
+      },
+      "VendorCreateDTO": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization ID"
+          },
+          "vendorName": {
+            "type": "string",
+            "description": "Vendor name"
+          },
+          "contactName": {
+            "type": "string",
+            "description": "Contact person name"
+          },
+          "contactEmail": {
+            "type": "string",
+            "format": "email",
+            "description": "Contact email address"
+          },
+          "contactPhone": {
+            "type": "string",
+            "description": "Contact phone number"
+          },
+          "address": {
+            "type": "string",
+            "description": "Vendor address"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Vendor status ID"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the vendor"
+          }
+        }
+      },
+      "TenantCreateDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Tenant name"
+          },
+          "domain": {
+            "type": "string",
+            "description": "Tenant domain"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the tenant"
+          }
+        }
+      },
+      "ApplicationDTO": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "integer",
+            "description": "Application ID"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "requisitionId": {
+            "type": "integer",
+            "description": "Job requisition ID"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Application status ID"
+          },
+          "appliedDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when application was submitted"
+          },
+          "source": {
+            "type": "string",
+            "description": "Application source (e.g., website, referral, etc.)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the application"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the application"
+          }
+        }
+      },
+      "ApplicationStatusDTO": {
+        "type": "object",
+        "properties": {
+          "statusId": {
+            "type": "integer",
+            "description": "Application status ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Application status name"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the status"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the status"
+          }
+        }
+      },
+      "JobRequisitionDTO": {
+        "type": "object",
+        "properties": {
+          "jobRequisitionId": {
+            "type": "integer",
+            "description": "Job requisition ID"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization ID"
+          },
+          "positionId": {
+            "type": "integer",
+            "description": "Position ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Job title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Job description"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Job requisition status ID"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the requisition"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the requisition"
+          }
+        }
+      },
+      "OrganizationDTO": {
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization ID"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Organization name"
+          },
+          "address": {
+            "type": "string",
+            "description": "Organization address"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Organization status ID"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the organization"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the organization"
+          }
+        }
+      },
+      "VendorDTO": {
+        "type": "object",
+        "properties": {
+          "vendorId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Vendor ID"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization ID"
+          },
+          "vendorName": {
+            "type": "string",
+            "description": "Vendor name"
+          },
+          "contactName": {
+            "type": "string",
+            "description": "Contact person name"
+          },
+          "contactEmail": {
+            "type": "string",
+            "format": "email",
+            "description": "Contact email address"
+          },
+          "contactPhone": {
+            "type": "string",
+            "description": "Contact phone number"
+          },
+          "address": {
+            "type": "string",
+            "description": "Vendor address"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Vendor status ID"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the vendor"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the vendor"
+          }
+        }
+      },
+      "TenantDTO": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Tenant name"
+          },
+          "domain": {
+            "type": "string",
+            "description": "Tenant domain"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the tenant"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the tenant"
+          }
+        }
+      },
+      "CandidateDTO": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization ID"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "First name"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of birth"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Gender"
+          },
+          "nationality": {
+            "type": "string",
+            "description": "Nationality"
+          },
+          "middleName": {
+            "type": "string",
+            "description": "Middle name"
+          },
+          "city": {
+            "type": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "description": "State"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country"
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Postal code"
+          },
+          "linkedinUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "LinkedIn URL"
+          },
+          "currentSalary": {
+            "type": "number",
+            "description": "Current salary"
+          },
+          "expectedSalary": {
+            "type": "number",
+            "description": "Expected salary"
+          },
+          "noticePeriod": {
+            "type": "integer",
+            "description": "Notice period in days"
+          },
+          "availabilityDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Availability date"
+          },
+          "status": {
+            "type": "string",
+            "description": "Candidate status"
+          },
+          "source": {
+            "type": "string",
+            "description": "Candidate source"
+          },
+          "vendorId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Vendor ID"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Notes"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the candidate"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the candidate"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deletion timestamp"
+          },
+          "deletedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who deleted the candidate"
+          }
+        }
+      },
+      "CandidateCreateDTO": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization ID"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "First name"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of birth"
+          },
+          "gender": {
+            "type": "string",
+            "description": "Gender"
+          },
+          "nationality": {
+            "type": "string",
+            "description": "Nationality"
+          },
+          "middleName": {
+            "type": "string",
+            "description": "Middle name"
+          },
+          "city": {
+            "type": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "description": "State"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country"
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Postal code"
+          },
+          "linkedinUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "LinkedIn URL"
+          },
+          "currentSalary": {
+            "type": "number",
+            "description": "Current salary"
+          },
+          "expectedSalary": {
+            "type": "number",
+            "description": "Expected salary"
+          },
+          "noticePeriod": {
+            "type": "integer",
+            "description": "Notice period in days"
+          },
+          "availabilityDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Availability date"
+          },
+          "status": {
+            "type": "string",
+            "description": "Candidate status"
+          },
+          "source": {
+            "type": "string",
+            "description": "Candidate source"
+          },
+          "vendorId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Vendor ID"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Notes"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the candidate"
+          }
+        }
+      },
+      "CandidateSkillDTO": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "skillId": {
+            "type": "integer",
+            "description": "Skill ID"
+          },
+          "proficiencyLevel": {
+            "type": "string",
+            "description": "Proficiency level"
+          },
+          "yearsOfExperience": {
+            "type": "integer",
+            "description": "Years of experience"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the skill"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the skill"
+          }
+        }
+      },
+      "CandidateSkillCreateDTO": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "skillId": {
+            "type": "integer",
+            "description": "Skill ID"
+          },
+          "proficiencyLevel": {
+            "type": "string",
+            "description": "Proficiency level"
+          },
+          "yearsOfExperience": {
+            "type": "integer",
+            "description": "Years of experience"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the skill"
+          }
+        }
+      },
+      "CandidateEducationDTO": {
+        "type": "object",
+        "properties": {
+          "educationId": {
+            "type": "integer",
+            "description": "Education ID"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "institution": {
+            "type": "string",
+            "description": "Institution name"
+          },
+          "degree": {
+            "type": "string",
+            "description": "Degree"
+          },
+          "fieldOfStudy": {
+            "type": "string",
+            "description": "Field of study"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "description": "End date"
+          },
+          "grade": {
+            "type": "string",
+            "description": "Grade"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Notes"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the education"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the education"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description"
+          },
+          "institutionName": {
+            "type": "string",
+            "description": "Institution name"
+          }
+        }
+      },
+      "CandidateEducationCreateDTO": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "institution": {
+            "type": "string",
+            "description": "Institution name"
+          },
+          "degree": {
+            "type": "string",
+            "description": "Degree"
+          },
+          "fieldOfStudy": {
+            "type": "string",
+            "description": "Field of study"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "description": "End date"
+          },
+          "grade": {
+            "type": "string",
+            "description": "Grade"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Notes"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the education"
+          }
+        }
+      },
+      "CandidateWorkHistoryDTO": {
+        "type": "object",
+        "properties": {
+          "workHistoryId": {
+            "type": "integer",
+            "description": "Work history ID"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "companyName": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "positionTitle": {
+            "type": "string",
+            "description": "Position title"
+          },
+          "location": {
+            "type": "string",
+            "description": "Location"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "description": "End date"
+          },
+          "responsibilities": {
+            "type": "string",
+            "description": "Responsibilities"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the work history"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the work history"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description"
+          },
+          "jobTitle": {
+            "type": "string",
+            "description": "Job title"
+          }
+        }
+      },
+      "CandidateWorkHistoryCreateDTO": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "companyName": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "positionTitle": {
+            "type": "string",
+            "description": "Position title"
+          },
+          "location": {
+            "type": "string",
+            "description": "Location"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "description": "End date"
+          },
+          "responsibilities": {
+            "type": "string",
+            "description": "Responsibilities"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the work history"
+          }
+        }
+      },
+      "CandidateCertificationDTO": {
+        "type": "object",
+        "properties": {
+          "certificationId": {
+            "type": "integer",
+            "description": "Certification ID"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "certificateName": {
+            "type": "string",
+            "description": "Certificate name"
+          },
+          "issuedBy": {
+            "type": "string",
+            "description": "Issued by"
+          },
+          "issueDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Issue date"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Expiry date"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the certification"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the certification"
+          },
+          "certificationName": {
+            "type": "string",
+            "description": "Certification name"
+          },
+          "issuingOrganization": {
+            "type": "string",
+            "description": "Issuing organization"
+          }
+        }
+      },
+      "CandidateCertificationCreateDTO": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "certificateName": {
+            "type": "string",
+            "description": "Certificate name"
+          },
+          "issuedBy": {
+            "type": "string",
+            "description": "Issued by"
+          },
+          "issueDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Issue date"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Expiry date"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the certification"
+          }
+        }
+      },
+      "CandidateReferenceDTO": {
+        "type": "object",
+        "properties": {
+          "referenceId": {
+            "type": "integer",
+            "description": "Reference ID"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "referenceName": {
+            "type": "string",
+            "description": "Reference name"
+          },
+          "relationship": {
+            "type": "string",
+            "description": "Relationship"
+          },
+          "company": {
+            "type": "string",
+            "description": "Company"
+          },
+          "position": {
+            "type": "string",
+            "description": "Position"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone"
+          },
+          "isVerified": {
+            "type": "boolean",
+            "description": "Is verified"
+          },
+          "verificationDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Verification date"
+          },
+          "verifiedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Verified by"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the reference"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the reference"
+          }
+        }
+      },
+      "CandidateReferenceCreateDTO": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "referenceName": {
+            "type": "string",
+            "description": "Reference name"
+          },
+          "relationship": {
+            "type": "string",
+            "description": "Relationship"
+          },
+          "company": {
+            "type": "string",
+            "description": "Company"
+          },
+          "position": {
+            "type": "string",
+            "description": "Position"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the reference"
+          }
+        }
+      },
+      "CandidateIdentityDTO": {
+        "type": "object",
+        "properties": {
+          "identityId": {
+            "type": "integer",
+            "description": "Identity ID"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "idTypeId": {
+            "type": "integer",
+            "description": "ID type ID"
+          },
+          "idNumber": {
+            "type": "string",
+            "description": "ID number"
+          },
+          "issuingCountry": {
+            "type": "string",
+            "description": "Issuing country"
+          },
+          "issueDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Issue date"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Expiry date"
+          },
+          "isVerified": {
+            "type": "boolean",
+            "description": "Is verified"
+          },
+          "verificationDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Verification date"
+          },
+          "verifiedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Verified by"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the identity"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the identity"
+          },
+          "idTypeName": {
+            "type": "string",
+            "description": "ID type name"
+          }
+        }
+      },
+      "CandidateIdentityCreateDTO": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "idTypeId": {
+            "type": "integer",
+            "description": "ID type ID"
+          },
+          "idNumber": {
+            "type": "string",
+            "description": "ID number"
+          },
+          "issuingCountry": {
+            "type": "string",
+            "description": "Issuing country"
+          },
+          "issueDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Issue date"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Expiry date"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the identity"
+          }
+        }
+      },
+      "CandidateDocumentDTO": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "integer",
+            "description": "Document ID"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "documentTypeId": {
+            "type": "integer",
+            "description": "Document type ID"
+          },
+          "fileName": {
+            "type": "string",
+            "description": "File name"
+          },
+          "originalFileName": {
+            "type": "string",
+            "description": "Original file name"
+          },
+          "filePath": {
+            "type": "string",
+            "description": "File path"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64",
+            "description": "File size in bytes"
+          },
+          "mimeType": {
+            "type": "string",
+            "description": "MIME type"
+          },
+          "uploadDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Upload date"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Expiry date"
+          },
+          "isVerified": {
+            "type": "boolean",
+            "description": "Is verified"
+          },
+          "verificationDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Verification date"
+          },
+          "verifiedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Verified by"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the document"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the document"
+          },
+          "documentTypeName": {
+            "type": "string",
+            "description": "Document type name"
+          },
+          "downloadUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Download URL"
+          }
+        }
+      },
+      "CandidateDocumentCreateDTO": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "documentTypeId": {
+            "type": "integer",
+            "description": "Document type ID"
+          },
+          "fileName": {
+            "type": "string",
+            "description": "File name"
+          },
+          "originalFileName": {
+            "type": "string",
+            "description": "Original file name"
+          },
+          "filePath": {
+            "type": "string",
+            "description": "File path"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64",
+            "description": "File size in bytes"
+          },
+          "mimeType": {
+            "type": "string",
+            "description": "MIME type"
+          },
+          "uploadDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Upload date"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Expiry date"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the document"
+          }
+        }
+      },
+      "CandidateCreateResponseDTO": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "status": {
+            "type": "string",
+            "description": "Response status (e.g., CREATED, FAILED, PROCESSING)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Response message"
+          },
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation was successful"
+          },
+          "email": {
+            "type": "string",
+            "description": "Candidate email for correlation with original request"
+          }
+        }
+      },
+      "PositionDTO": {
+        "type": "object",
+        "properties": {
+          "positionId": {
+            "type": "integer",
+            "description": "Position ID"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization ID"
+          },
+          "departmentId": {
+            "type": "integer",
+            "description": "Department ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Position title"
+          },
+          "location": {
+            "type": "string",
+            "description": "Location"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description"
+          },
+          "employmentType": {
+            "type": "string",
+            "description": "Employment type"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Status ID"
+          },
+          "headcount": {
+            "type": "integer",
+            "description": "Headcount"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the position"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the position"
+          }
+        }
+      },
+      "PositionCreateDTO": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant ID"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Organization ID"
+          },
+          "departmentId": {
+            "type": "integer",
+            "description": "Department ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Position title"
+          },
+          "location": {
+            "type": "string",
+            "description": "Location"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description"
+          },
+          "employmentType": {
+            "type": "string",
+            "description": "Employment type"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Status ID"
+          },
+          "headcount": {
+            "type": "integer",
+            "description": "Headcount"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the position"
+          }
+        }
+      },
+      "PositionStatusDTO": {
+        "type": "object",
+        "properties": {
+          "statusId": {
+            "type": "integer",
+            "description": "Status ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Status name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who created the status"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID who updated the status"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Master Data",
+      "description": "Master data management operations including autocompletion"
+    },
+    {
+      "name": "Candidates",
+      "description": "Candidate management operations"
+    },
+    {
+      "name": "Positions",
+      "description": "Position management operations"
+    },
+    {
+      "name": "Applications",
+      "description": "Job application management operations"
+    },
+    {
+      "name": "Job Requisitions",
+      "description": "Job requisition management operations"
+    },
+    {
+      "name": "Organizations",
+      "description": "Organization management operations"
+    },
+    {
+      "name": "Vendors",
+      "description": "Vendor management operations"
+    },
+    {
+      "name": "Health",
+      "description": "Health check and monitoring endpoints"
+    }
+  ],
+  "paths": {
+    "/master-data/document-types": {
+      "get": {
+        "summary": "Get all document types",
+        "description": "Retrieve all document types in the system",
+        "tags": ["Master Data"],
+        "responses": {
+          "200": {
+            "description": "Document types retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentTypeDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/document-types/{id}": {
+      "get": {
+        "summary": "Get document type by ID",
+        "description": "Retrieve a specific document type by its ID",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Document type ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document type retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentTypeDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Document type not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/document-types/search": {
+      "get": {
+        "summary": "Search document types",
+        "description": "Search document types with autocompletion support",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query for document type names"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Maximum number of results to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document types search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentTypeDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/id-types": {
+      "get": {
+        "summary": "Get all ID types",
+        "description": "Retrieve all ID types in the system",
+        "tags": ["Master Data"],
+        "responses": {
+          "200": {
+            "description": "ID types retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IdTypeDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/id-types/{id}": {
+      "get": {
+        "summary": "Get ID type by ID",
+        "description": "Retrieve a specific ID type by its ID",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID type ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ID type retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdTypeDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ID type not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/id-types/search": {
+      "get": {
+        "summary": "Search ID types",
+        "description": "Search ID types with autocompletion support",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query for ID type names"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Maximum number of results to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ID types search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IdTypeDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/countries": {
+      "get": {
+        "summary": "Get all countries",
+        "description": "Retrieve all countries in the system",
+        "tags": ["Master Data"],
+        "responses": {
+          "200": {
+            "description": "Countries retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CountryDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/countries/{id}": {
+      "get": {
+        "summary": "Get country by ID",
+        "description": "Retrieve a specific country by its ID",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Country ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Country retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Country not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/countries/code/{code}": {
+      "get": {
+        "summary": "Get country by code",
+        "description": "Retrieve a specific country by its country code",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Country code (e.g., US, CA)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Country retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Country not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/countries/search": {
+      "get": {
+        "summary": "Search countries",
+        "description": "Search countries with autocompletion support",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query for country names"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Maximum number of results to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Countries search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CountryDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/states": {
+      "get": {
+        "summary": "Get all states",
+        "description": "Retrieve all states in the system",
+        "tags": ["Master Data"],
+        "responses": {
+          "200": {
+            "description": "States retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StateDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/states/search": {
+      "get": {
+        "summary": "Search states",
+        "description": "Search states with autocompletion support",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query for state names"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Maximum number of results to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "States search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StateDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/skills": {
+      "get": {
+        "summary": "Get all skills",
+        "description": "Retrieve all skills in the system",
+        "tags": ["Master Data"],
+        "responses": {
+          "200": {
+            "description": "Skills retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SkillDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/skills/search": {
+      "get": {
+        "summary": "Search skills",
+        "description": "Search skills with autocompletion support",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query for skill names"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Maximum number of results to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Skills search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SkillDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/departments": {
+      "get": {
+        "summary": "Get all departments",
+        "description": "Retrieve all departments in the system",
+        "tags": ["Master Data"],
+        "responses": {
+          "200": {
+            "description": "Departments retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DepartmentDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/departments/search": {
+      "get": {
+        "summary": "Search departments",
+        "description": "Search departments with autocompletion support",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query for department names"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Maximum number of results to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Departments search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DepartmentDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/user-roles": {
+      "get": {
+        "summary": "Get all user roles",
+        "description": "Retrieve all user roles in the system",
+        "tags": ["Master Data"],
+        "responses": {
+          "200": {
+            "description": "User roles retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserRoleDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/user-roles/search": {
+      "get": {
+        "summary": "Search user roles",
+        "description": "Search user roles with autocompletion support",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query for user role names"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Maximum number of results to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User roles search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserRoleDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/user-types": {
+      "get": {
+        "summary": "Get all user types",
+        "description": "Retrieve all user types in the system",
+        "tags": ["Master Data"],
+        "responses": {
+          "200": {
+            "description": "User types retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserTypeDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/master-data/user-types/search": {
+      "get": {
+        "summary": "Search user types",
+        "description": "Search user types with autocompletion support",
+        "tags": ["Master Data"],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query for user type names"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Maximum number of results to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User types search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserTypeDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates": {
+      "get": {
+        "summary": "Get all candidates",
+        "description": "Retrieve all candidates with pagination support",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Page number (0-based)"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Page size"
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "id"
+            },
+            "description": "Sort field"
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["ASC", "DESC"],
+              "default": "ASC"
+            },
+            "description": "Sort direction"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidates retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create candidate",
+        "description": "Create a new candidate",
+        "tags": ["Candidates"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateCreateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Candidate created successfully"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/{candidateId}": {
+      "get": {
+        "summary": "Get candidate by ID",
+        "description": "Retrieve a specific candidate by ID",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CandidateDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update candidate",
+        "description": "Update an existing candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Candidate updated successfully"
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete candidate",
+        "description": "Delete a candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate deleted successfully"
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/{candidateId}/skills": {
+      "get": {
+        "summary": "Get candidate skills",
+        "description": "Retrieve all skills for a specific candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate skills retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CandidateSkillDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add candidate skill",
+        "description": "Add a skill to a candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateSkillCreateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Skill added successfully"
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/{candidateId}/educations": {
+      "get": {
+        "summary": "Get candidate educations",
+        "description": "Retrieve all educations for a specific candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate educations retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CandidateEducationDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add candidate education",
+        "description": "Add an education to a candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateEducationCreateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Education added successfully"
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/{candidateId}/work-histories": {
+      "get": {
+        "summary": "Get candidate work histories",
+        "description": "Retrieve all work histories for a specific candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate work histories retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CandidateWorkHistoryDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add candidate work history",
+        "description": "Add a work history to a candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateWorkHistoryCreateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Work history added successfully"
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/{candidateId}/certifications": {
+      "get": {
+        "summary": "Get candidate certifications",
+        "description": "Retrieve all certifications for a specific candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate certifications retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CandidateCertificationDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add candidate certification",
+        "description": "Add a certification to a candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateCertificationCreateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Certification added successfully"
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/{candidateId}/references": {
+      "get": {
+        "summary": "Get candidate references",
+        "description": "Retrieve all references for a specific candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate references retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CandidateReferenceDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add candidate reference",
+        "description": "Add a reference to a candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateReferenceCreateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reference added successfully"
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/{candidateId}/identities": {
+      "get": {
+        "summary": "Get candidate identities",
+        "description": "Retrieve all identities for a specific candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate identities retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CandidateIdentityDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add candidate identity",
+        "description": "Add an identity to a candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateIdentityCreateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Identity added successfully"
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/{candidateId}/documents": {
+      "get": {
+        "summary": "Get candidate documents",
+        "description": "Retrieve all documents for a specific candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Candidate documents retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CandidateDocumentDTO"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add candidate document",
+        "description": "Add a document to a candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidateDocumentCreateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Document added successfully"
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/{candidateId}/response-status": {
+      "get": {
+        "summary": "Get candidate response status",
+        "description": "Retrieve the response status for a specific candidate by ID",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CandidateCreateResponseDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Response status not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/response-status/{email}": {
+      "get": {
+        "summary": "Get candidate response status by email",
+        "description": "Retrieve the response status for a specific candidate by email",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate email"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CandidateCreateResponseDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Response status not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/response-status": {
+      "get": {
+        "summary": "Get all candidate response statuses",
+        "description": "Retrieve all candidate response statuses",
+        "tags": ["Candidates"],
+        "responses": {
+          "200": {
+            "description": "Response statuses retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CandidateCreateResponseDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/candidates/response-status/{candidateId}": {
+      "delete": {
+        "summary": "Delete candidate response status",
+        "description": "Delete the response status for a specific candidate",
+        "tags": ["Candidates"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Response status deleted successfully"
+          },
+          "404": {
+            "description": "Response status not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/positions": {
+      "get": {
+        "summary": "Get all positions",
+        "description": "Retrieve all positions with pagination support",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Page number (0-based)"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "description": "Page size"
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "positionId"
+            },
+            "description": "Sort field"
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["ASC", "DESC"],
+              "default": "ASC"
+            },
+            "description": "Sort direction"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Positions retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create position",
+        "description": "Create a new position",
+        "tags": ["Positions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PositionCreateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Position created successfully"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/positions/{id}": {
+      "get": {
+        "summary": "Get position by ID",
+        "description": "Retrieve a specific position by ID",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Position ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Position retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Position not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update position",
+        "description": "Update an existing position",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Position ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PositionDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Position updated successfully"
+          },
+          "404": {
+            "description": "Position not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete position",
+        "description": "Delete a position",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Position ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Position deleted successfully"
+          },
+          "404": {
+            "description": "Position not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/positions/statuses": {
+      "get": {
+        "summary": "Get all position statuses",
+        "description": "Retrieve all position statuses",
+        "tags": ["Positions"],
+        "responses": {
+          "200": {
+            "description": "Position statuses retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PositionStatusDTO"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create position status",
+        "description": "Create a new position status",
+        "tags": ["Positions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PositionStatusDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Position status created successfully"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/positions/statuses/{id}": {
+      "get": {
+        "summary": "Get position status by ID",
+        "description": "Retrieve a specific position status by ID",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Position status ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Position status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositionStatusDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Position status not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update position status",
+        "description": "Update an existing position status",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Position status ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PositionStatusDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Position status updated successfully"
+          },
+          "404": {
+            "description": "Position status not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete position status",
+        "description": "Delete a position status",
+        "tags": ["Positions"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Position status ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Position status deleted successfully"
+          },
+          "404": {
+            "description": "Position status not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications": {
+      "get": {
+        "summary": "Get all applications",
+        "description": "Retrieve all applications with pagination support",
+        "tags": ["Applications"],
+        "parameters": [
+          { "name": "page", "in": "query", "required": false, "schema": { "type": "integer", "default": 0 }, "description": "Page number (0-based)" },
+          { "name": "size", "in": "query", "required": false, "schema": { "type": "integer", "default": 20 }, "description": "Page size" },
+          { "name": "sortBy", "in": "query", "required": false, "schema": { "type": "string", "default": "applicationId" }, "description": "Sort field" },
+          { "name": "sortDirection", "in": "query", "required": false, "schema": { "type": "string", "enum": ["ASC", "DESC"], "default": "ASC" }, "description": "Sort direction" }
+        ],
+        "responses": {
+          "200": { "description": "Applications retrieved successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedResponse" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "post": {
+        "summary": "Create application",
+        "description": "Create a new application",
+        "tags": ["Applications"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApplicationCreateDTO" } } } },
+        "responses": {
+          "201": { "description": "Application created successfully" },
+          "400": { "description": "Bad request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/applications/candidate/{candidateId}": {
+      "get": {
+        "summary": "Get applications for candidate",
+        "description": "Retrieve all applications for a specific candidate",
+        "tags": ["Applications"],
+        "parameters": [
+          { "name": "candidateId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Candidate ID" }
+        ],
+        "responses": {
+          "200": { "description": "Applications retrieved successfully", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/ApplicationDTO" } } } } },
+          "404": { "description": "Candidate not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/applications/candidate/{candidateId}/application/{applicationId}": {
+      "get": {
+        "summary": "Get application by ID",
+        "description": "Retrieve a specific application by ID",
+        "tags": ["Applications"],
+        "parameters": [
+          { "name": "candidateId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Candidate ID" },
+          { "name": "applicationId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Application ID" }
+        ],
+        "responses": {
+          "200": { "description": "Application retrieved successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApplicationDTO" } } } },
+          "404": { "description": "Application not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update application",
+        "description": "Update an existing application",
+        "tags": ["Applications"],
+        "parameters": [
+          { "name": "candidateId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Candidate ID" },
+          { "name": "applicationId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Application ID" }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApplicationDTO" } } } },
+        "responses": {
+          "200": { "description": "Application updated successfully" },
+          "404": { "description": "Application not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "summary": "Delete application",
+        "description": "Delete an application",
+        "tags": ["Applications"],
+        "parameters": [
+          { "name": "candidateId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Candidate ID" },
+          { "name": "applicationId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Application ID" }
+        ],
+        "responses": {
+          "200": { "description": "Application deleted successfully" },
+          "404": { "description": "Application not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/applications/candidate/{candidateId}/application/{applicationId}/status": {
+      "get": {
+        "summary": "Get application status",
+        "description": "Retrieve the status of a specific application",
+        "tags": ["Applications"],
+        "parameters": [
+          { "name": "candidateId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Candidate ID" },
+          { "name": "applicationId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Application ID" }
+        ],
+        "responses": {
+          "200": { "description": "Application status retrieved successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApplicationStatusDTO" } } } },
+          "404": { "description": "Application not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update application status",
+        "description": "Update the status of a specific application",
+        "tags": ["Applications"],
+        "parameters": [
+          { "name": "candidateId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Candidate ID" },
+          { "name": "applicationId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Application ID" }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApplicationStatusDTO" } } } },
+        "responses": {
+          "200": { "description": "Application status updated successfully" },
+          "404": { "description": "Application not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "summary": "Delete application status",
+        "description": "Delete the status of a specific application",
+        "tags": ["Applications"],
+        "parameters": [
+          { "name": "candidateId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Candidate ID" },
+          { "name": "applicationId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Application ID" }
+        ],
+        "responses": {
+          "200": { "description": "Application status deleted successfully" },
+          "404": { "description": "Application not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/applications/status": {
+      "post": {
+        "summary": "Create application status",
+        "description": "Create a new application status",
+        "tags": ["Applications"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApplicationStatusCreateDTO" } } } },
+        "responses": {
+          "201": { "description": "Application status created successfully" },
+          "400": { "description": "Bad request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/job-requisitions": {
+      "get": {
+        "summary": "Get all job requisitions",
+        "description": "Retrieve all job requisitions with pagination support",
+        "tags": ["Job Requisitions"],
+        "parameters": [
+          { "name": "page", "in": "query", "required": false, "schema": { "type": "integer", "default": 0 }, "description": "Page number (0-based)" },
+          { "name": "size", "in": "query", "required": false, "schema": { "type": "integer", "default": 20 }, "description": "Page size" },
+          { "name": "sortBy", "in": "query", "required": false, "schema": { "type": "string", "default": "jobRequisitionId" }, "description": "Sort field" },
+          { "name": "sortDirection", "in": "query", "required": false, "schema": { "type": "string", "enum": ["ASC", "DESC"], "default": "ASC" }, "description": "Sort direction" }
+        ],
+        "responses": {
+          "200": { "description": "Job requisitions retrieved successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedResponse" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "post": {
+        "summary": "Create job requisition",
+        "description": "Create a new job requisition",
+        "tags": ["Job Requisitions"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JobRequisitionCreateDTO" } } } },
+        "responses": {
+          "201": { "description": "Job requisition created successfully" },
+          "400": { "description": "Bad request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update job requisition",
+        "description": "Update an existing job requisition",
+        "tags": ["Job Requisitions"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JobRequisitionDTO" } } } },
+        "responses": {
+          "200": { "description": "Job requisition updated successfully" },
+          "400": { "description": "Bad request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Job requisition not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/job-requisitions/{id}": {
+      "get": {
+        "summary": "Get job requisition by ID",
+        "description": "Retrieve a specific job requisition by ID",
+        "tags": ["Job Requisitions"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Job requisition ID" }
+        ],
+        "responses": {
+          "200": { "description": "Job requisition retrieved successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JobRequisitionDTO" } } } },
+          "404": { "description": "Job requisition not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "summary": "Delete job requisition",
+        "description": "Delete a job requisition",
+        "tags": ["Job Requisitions"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Job requisition ID" }
+        ],
+        "responses": {
+          "200": { "description": "Job requisition deleted successfully" },
+          "404": { "description": "Job requisition not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/organizations": {
+      "get": {
+        "summary": "Get all organizations",
+        "description": "Retrieve all organizations with pagination support",
+        "tags": ["Organizations"],
+        "parameters": [
+          { "name": "page", "in": "query", "required": false, "schema": { "type": "integer", "default": 0 }, "description": "Page number (0-based)" },
+          { "name": "size", "in": "query", "required": false, "schema": { "type": "integer", "default": 20 }, "description": "Page size" },
+          { "name": "sortBy", "in": "query", "required": false, "schema": { "type": "string", "default": "organizationId" }, "description": "Sort field" },
+          { "name": "sortDirection", "in": "query", "required": false, "schema": { "type": "string", "enum": ["ASC", "DESC"], "default": "ASC" }, "description": "Sort direction" }
+        ],
+        "responses": {
+          "200": { "description": "Organizations retrieved successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedResponse" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "post": {
+        "summary": "Create organization",
+        "description": "Create a new organization",
+        "tags": ["Organizations"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OrganizationCreateDTO" } } } },
+        "responses": {
+          "201": { "description": "Organization created successfully" },
+          "400": { "description": "Bad request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/organizations/{organizationId}": {
+      "get": {
+        "summary": "Get organization by ID",
+        "description": "Retrieve a specific organization by ID",
+        "tags": ["Organizations"],
+        "parameters": [
+          { "name": "organizationId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Organization ID" }
+        ],
+        "responses": {
+          "200": { "description": "Organization retrieved successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OrganizationDTO" } } } },
+          "404": { "description": "Organization not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update organization",
+        "description": "Update an existing organization",
+        "tags": ["Organizations"],
+        "parameters": [
+          { "name": "organizationId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Organization ID" }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OrganizationDTO" } } } },
+        "responses": {
+          "200": { "description": "Organization updated successfully" },
+          "404": { "description": "Organization not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "summary": "Delete organization",
+        "description": "Delete an organization",
+        "tags": ["Organizations"],
+        "parameters": [
+          { "name": "organizationId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Organization ID" }
+        ],
+        "responses": {
+          "200": { "description": "Organization deleted successfully" },
+          "404": { "description": "Organization not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vendors": {
+      "get": {
+        "summary": "Get all vendors",
+        "description": "Retrieve all vendors with pagination support",
+        "tags": ["Vendors"],
+        "parameters": [
+          { "name": "page", "in": "query", "required": false, "schema": { "type": "integer", "default": 0 }, "description": "Page number (0-based)" },
+          { "name": "size", "in": "query", "required": false, "schema": { "type": "integer", "default": 20 }, "description": "Page size" },
+          { "name": "sortBy", "in": "query", "required": false, "schema": { "type": "string", "default": "vendorId" }, "description": "Sort field" },
+          { "name": "sortDirection", "in": "query", "required": false, "schema": { "type": "string", "enum": ["ASC", "DESC"], "default": "ASC" }, "description": "Sort direction" }
+        ],
+        "responses": {
+          "200": { "description": "Vendors retrieved successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedResponse" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "post": {
+        "summary": "Create vendor",
+        "description": "Create a new vendor",
+        "tags": ["Vendors"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VendorCreateDTO" } } } },
+        "responses": {
+          "201": { "description": "Vendor created successfully" },
+          "400": { "description": "Bad request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vendors/{vendorId}": {
+      "get": {
+        "summary": "Get vendor by ID",
+        "description": "Retrieve a specific vendor by ID",
+        "tags": ["Vendors"],
+        "parameters": [
+          { "name": "vendorId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" }, "description": "Vendor ID" }
+        ],
+        "responses": {
+          "200": { "description": "Vendor retrieved successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VendorDTO" } } } },
+          "404": { "description": "Vendor not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update vendor",
+        "description": "Update an existing vendor",
+        "tags": ["Vendors"],
+        "parameters": [
+          { "name": "vendorId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" }, "description": "Vendor ID" }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VendorDTO" } } } },
+        "responses": {
+          "200": { "description": "Vendor updated successfully" },
+          "404": { "description": "Vendor not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "summary": "Delete vendor",
+        "description": "Delete a vendor",
+        "tags": ["Vendors"],
+        "parameters": [
+          { "name": "vendorId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" }, "description": "Vendor ID" }
+        ],
+        "responses": {
+          "200": { "description": "Vendor deleted successfully" },
+          "404": { "description": "Vendor not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/tenants": {
+      "get": {
+        "summary": "Get all tenants",
+        "description": "Retrieve all tenants with pagination support",
+        "tags": ["Tenants"],
+        "parameters": [
+          { "name": "page", "in": "query", "required": false, "schema": { "type": "integer", "default": 0 }, "description": "Page number (0-based)" },
+          { "name": "size", "in": "query", "required": false, "schema": { "type": "integer", "default": 20 }, "description": "Page size" },
+          { "name": "sortBy", "in": "query", "required": false, "schema": { "type": "string", "default": "tenantId" }, "description": "Sort field" },
+          { "name": "sortDirection", "in": "query", "required": false, "schema": { "type": "string", "enum": ["ASC", "DESC"], "default": "ASC" }, "description": "Sort direction" }
+        ],
+        "responses": {
+          "200": { "description": "Tenants retrieved successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedResponse" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "post": {
+        "summary": "Create tenant",
+        "description": "Create a new tenant",
+        "tags": ["Tenants"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TenantCreateDTO" } } } },
+        "responses": {
+          "201": { "description": "Tenant created successfully" },
+          "400": { "description": "Bad request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/tenants/{tenantId}": {
+      "get": {
+        "summary": "Get tenant by ID",
+        "description": "Retrieve a specific tenant by ID",
+        "tags": ["Tenants"],
+        "parameters": [
+          { "name": "tenantId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Tenant ID" }
+        ],
+        "responses": {
+          "200": { "description": "Tenant retrieved successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TenantDTO" } } } },
+          "404": { "description": "Tenant not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update tenant",
+        "description": "Update an existing tenant",
+        "tags": ["Tenants"],
+        "parameters": [
+          { "name": "tenantId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Tenant ID" }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TenantDTO" } } } },
+        "responses": {
+          "200": { "description": "Tenant updated successfully" },
+          "404": { "description": "Tenant not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "summary": "Delete tenant",
+        "description": "Delete a tenant",
+        "tags": ["Tenants"],
+        "parameters": [
+          { "name": "tenantId", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Tenant ID" }
+        ],
+        "responses": {
+          "200": { "description": "Tenant deleted successfully" },
+          "404": { "description": "Tenant not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/hello": {
+      "get": {
+        "summary": "Hello endpoint",
+        "description": "Simple hello endpoint to verify service is running",
+        "tags": ["Core"],
+        "responses": {
+          "200": { "description": "Hello message", "content": { "application/json": { "schema": { "type": "string" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/publish": {
+      "post": {
+        "summary": "Publish message",
+        "description": "Publish a message to Kafka topic",
+        "tags": ["Core"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "string" } } } },
+        "responses": {
+          "200": { "description": "Message published successfully" },
+          "400": { "description": "Bad request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Internal server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    }
+  }
+} 

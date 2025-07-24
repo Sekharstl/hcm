@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vendor-service-config
+  labels:
+    app: vendor-service
+data:
+  SAMPLE_PROPERTY: "sample-value" 

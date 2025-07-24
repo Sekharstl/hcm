@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hcm-frontend
+  labels:
+    app: hcm-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hcm-frontend
+  template:
+    metadata:
+      labels:
+        app: hcm-frontend
+    spec:
+      containers:
+        - name: hcm-frontend
+          image: techbu/hcm-frontend:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: hcm-frontend-config
+            - secretRef:
+                name: hcm-frontend-secret 

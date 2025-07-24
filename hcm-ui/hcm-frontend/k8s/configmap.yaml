@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hcm-frontend-config
+  labels:
+    app: hcm-frontend
+data:
+  NEXT_PUBLIC_OKTA_ISSUER: "https://trial-5154110.okta.com/oauth2/default"
+  NEXT_PUBLIC_OKTA_CLIENT_ID: "0oaruxfoshJgPhuJA697"
+  NEXT_PUBLIC_BASE_URL: "http://10.19.5.50:30080/" 

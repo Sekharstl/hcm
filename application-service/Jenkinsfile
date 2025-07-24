@@ -1,0 +1,167 @@
+pipeline {
+    agent any
+    environment {
+        DOCKER_REGISTRY = 'docker.io'  // Docker Hub registry
+        DOCKER_IMAGE = 'techbu/hcm-application-service'  // Change as needed for each service
+        DOCKER_TAG = "${BUILD_NUMBER}"
+        KUBE_NAMESPACE = 'hcm'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build hcm-common') {
+            steps {
+                dir('hcm-common') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+        stage('Build Service JAR') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    writeFile file: 'settings.xml', text: """
+<settings>
+  <servers>
+    <server>
+      <id>nexus</id>
+      <username>${NEXUS_USER}</username>
+      <password>${NEXUS_PASS}</password>
+    </server>
+  </servers>
+</settings>
+"""
+                    dir('application-service') {
+                        sh 'mvn clean package -s ../settings.xml'
+                    }
+                }
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'sonarqube-credentials', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_TOKEN')]) {
+                    withSonarQubeEnv('SonarQube') {
+                        dir('application-service') {
+                            sh '''
+                                mvn sonar:sonar \
+                                  -Dsonar.projectKey="application-service" \
+                                  -Dsonar.projectName="Application Service" \
+                                  -Dsonar.login="${SONAR_TOKEN}"
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage('Docker Build & Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    dir('application-service') {
+                    sh '''
+                        echo "Logging into Docker Hub..."
+                        echo "$DOCKER_PASS" | docker login -u $DOCKER_USER --password-stdin || exit 1
+                        
+                        echo "Building Docker image..."
+                        docker build -t $DOCKER_IMAGE:$DOCKER_TAG . || exit 1
+                        
+                        echo "Tagging latest image..."
+                        docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_IMAGE:latest || exit 1
+                        
+                        echo "Pushing versioned image..."
+                        docker push $DOCKER_IMAGE:$DOCKER_TAG || exit 1
+                        
+                        echo "Pushing latest image..."
+                        docker push $DOCKER_IMAGE:latest || exit 1
+                    '''
+                    }
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: 'kubeconfig-jenkins', variable: 'KUBECONFIG')]) {
+                        sh 'echo ==== Jenkins Kubeconfig Diagnostics ===='
+                        sh 'kubectl --kubeconfig=$KUBECONFIG config get-contexts'
+                        sh 'kubectl --kubeconfig=$KUBECONFIG config current-context'
+                        sh 'kubectl --kubeconfig=$KUBECONFIG cluster-info'
+                        sh 'kubectl --kubeconfig=$KUBECONFIG get ns'
+                        sh 'kubectl --kubeconfig=$KUBECONFIG get all --all-namespaces'
+                        sh 'ls -l application-service/k8s/'
+                        sh """
+                            echo "Verifying cluster access..."
+                            kubectl --kubeconfig=$KUBECONFIG cluster-info || exit 1
+                            
+                            echo "Creating namespace if it doesn't exist..."
+                            kubectl --kubeconfig=$KUBECONFIG create namespace $KUBE_NAMESPACE --dry-run=client -o yaml | kubectl --kubeconfig=$KUBECONFIG apply -f - || exit 1
+                            
+                            echo "Applying ConfigMap..."
+                            kubectl --kubeconfig=$KUBECONFIG apply -n $KUBE_NAMESPACE -f application-service/k8s/configmap.yaml || exit 1
+                            
+                            echo "Applying Secrets (if present)..."
+                            if [ -f application-service/k8s/secrets.yaml ]; then
+                              kubectl --kubeconfig=$KUBECONFIG apply -n $KUBE_NAMESPACE -f application-service/k8s/secrets.yaml || exit 1
+                            fi
+                            
+                            echo "Applying Service..."
+                            kubectl --kubeconfig=$KUBECONFIG apply -n $KUBE_NAMESPACE -f application-service/k8s/service.yaml || exit 1
+                            
+                            echo "Checking if deployment exists..."
+                            if ! kubectl --kubeconfig=$KUBECONFIG get deployment application-service -n $KUBE_NAMESPACE &>/dev/null; then
+                                echo "Deployment does not exist. Creating initial deployment..."
+                                kubectl --kubeconfig=$KUBECONFIG apply -n $KUBE_NAMESPACE -f application-service/k8s/deployment.yaml || exit 1
+                            else
+                                echo "Updating existing deployment with new image..."
+                                kubectl --kubeconfig=$KUBECONFIG set image deployment/application-service \
+                                    application-service=$DOCKER_IMAGE:$DOCKER_TAG \
+                                    -n $KUBE_NAMESPACE || exit 1
+                            fi
+                            
+                            echo "Waiting for deployment resource to be available..."
+                            for i in {1..10}; do
+                              kubectl --kubeconfig=$KUBECONFIG get deployment application-service -n $KUBE_NAMESPACE && break
+                              echo "Deployment not found yet. Waiting 3 seconds..."
+                              sleep 3
+                            done
+                            
+                            echo "Recent events in namespace..."
+                            kubectl --kubeconfig=$KUBECONFIG get events -n $KUBE_NAMESPACE --sort-by=.metadata.creationTimestamp | tail -20
+                            
+                            echo "All resources in namespace..."
+                            kubectl --kubeconfig=$KUBECONFIG get all -n $KUBE_NAMESPACE
+                            
+                            echo "Waiting for deployment to complete..."
+                            kubectl --kubeconfig=$KUBECONFIG rollout status deployment/application-service -n $KUBE_NAMESPACE || exit 1
+                            
+                            echo "Deployment completed successfully!"
+                        """
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            // Cleanup Docker credentials
+            sh 'docker logout || true'
+            
+            // Cleanup workspace
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed! Check the logs for details.'
+        }
+    }
+} 

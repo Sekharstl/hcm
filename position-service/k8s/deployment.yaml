@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: position-service
+  labels:
+    app: position-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: position-service
+  template:
+    metadata:
+      labels:
+        app: position-service
+    spec:
+      containers:
+        - name: position-service
+          image: techbu/hcm-position-service:latest
+          ports:
+            - containerPort: 9116
+          envFrom:
+            - configMapRef:
+                name: position-service-config
+            - secretRef:
+                name: position-service-secrets 

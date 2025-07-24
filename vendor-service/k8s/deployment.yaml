@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vendor-service
+  labels:
+    app: vendor-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vendor-service
+  template:
+    metadata:
+      labels:
+        app: vendor-service
+    spec:
+      containers:
+        - name: vendor-service
+          image: techbu/hcm-vendor-service:latest
+          ports:
+            - containerPort: 9128
+          envFrom:
+            - configMapRef:
+                name: vendor-service-config
+            - secretRef:
+                name: vendor-service-secrets 

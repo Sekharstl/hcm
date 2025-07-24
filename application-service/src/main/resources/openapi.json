@@ -1,0 +1,554 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Application Service API",
+    "version": "1.0.0",
+    "description": "API documentation for the Application Service.\n\nCopyright STLDIGITAL 2025",
+    "contact": {
+      "name": "STLDIGITAL",
+      "url": "https://www.stldigital.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://springdoc.org"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:9128/api/v1",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/applications": {
+      "get": {
+        "summary": "Get all applications",
+        "description": "Retrieve a list of all job applications",
+        "tags": ["Applications"],
+        "responses": {
+          "200": {
+            "description": "List of applications retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new application",
+        "description": "Create a new job application",
+        "tags": ["Applications"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationCreateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Application created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data"
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}": {
+      "get": {
+        "summary": "Get application by ID",
+        "description": "Retrieve a specific application by its ID",
+        "tags": ["Applications"],
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Application ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Application not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update application",
+        "description": "Update an existing application",
+        "tags": ["Applications"],
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Application ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationUpdateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Application not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete application",
+        "description": "Delete an application",
+        "tags": ["Applications"],
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Application ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Application deleted successfully"
+          },
+          "404": {
+            "description": "Application not found"
+          }
+        }
+      }
+    },
+    "/applications/candidate/{candidateId}": {
+      "get": {
+        "summary": "Get applications by candidate",
+        "description": "Retrieve all applications for a specific candidate",
+        "tags": ["Applications"],
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Candidate ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applications retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications/requisition/{requisitionId}": {
+      "get": {
+        "summary": "Get applications by requisition",
+        "description": "Retrieve all applications for a specific job requisition",
+        "tags": ["Applications"],
+        "parameters": [
+          {
+            "name": "requisitionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Requisition ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applications retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/application-statuses": {
+      "get": {
+        "summary": "Get all application statuses",
+        "description": "Retrieve a list of all application statuses",
+        "tags": ["Application Statuses"],
+        "responses": {
+          "200": {
+            "description": "List of application statuses retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationStatusDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new application status",
+        "description": "Create a new application status",
+        "tags": ["Application Statuses"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationStatusCreateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Application status created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationStatusDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data"
+          }
+        }
+      }
+    },
+    "/application-statuses/{statusId}": {
+      "get": {
+        "summary": "Get application status by ID",
+        "description": "Retrieve a specific application status by its ID",
+        "tags": ["Application Statuses"],
+        "parameters": [
+          {
+            "name": "statusId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Status ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationStatusDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Application status not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update application status",
+        "description": "Update an existing application status",
+        "tags": ["Application Statuses"],
+        "parameters": [
+          {
+            "name": "statusId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Status ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationStatusUpdateDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationStatusDTO"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Application status not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete application status",
+        "description": "Delete an application status",
+        "tags": ["Application Statuses"],
+        "parameters": [
+          {
+            "name": "statusId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Status ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Application status deleted successfully"
+          },
+          "404": {
+            "description": "Application status not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApplicationDTO": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "integer",
+            "description": "Application ID"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "requisitionId": {
+            "type": "integer",
+            "description": "Requisition ID"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Status ID"
+          },
+          "appliedDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Application date"
+          },
+          "source": {
+            "type": "string",
+            "description": "Application source"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Created by user ID"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Updated by user ID"
+          }
+        }
+      },
+      "ApplicationCreateDTO": {
+        "type": "object",
+        "required": ["candidateId", "requisitionId", "statusId", "appliedDate"],
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Candidate ID"
+          },
+          "requisitionId": {
+            "type": "integer",
+            "description": "Requisition ID"
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Status ID"
+          },
+          "appliedDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Application date"
+          },
+          "source": {
+            "type": "string",
+            "description": "Application source"
+          }
+        }
+      },
+      "ApplicationUpdateDTO": {
+        "type": "object",
+        "properties": {
+          "statusId": {
+            "type": "integer",
+            "description": "Status ID"
+          },
+          "appliedDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Application date"
+          },
+          "source": {
+            "type": "string",
+            "description": "Application source"
+          }
+        }
+      },
+      "ApplicationStatusDTO": {
+        "type": "object",
+        "properties": {
+          "statusId": {
+            "type": "integer",
+            "description": "Status ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Status name"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Created by user ID"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "updatedBy": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Updated by user ID"
+          }
+        }
+      },
+      "ApplicationStatusCreateDTO": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Status name"
+          }
+        }
+      },
+      "ApplicationStatusUpdateDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Status name"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Applications",
+      "description": "Application management endpoints"
+    },
+    {
+      "name": "Application Statuses",
+      "description": "Application status management endpoints"
+    }
+  ]
+} 

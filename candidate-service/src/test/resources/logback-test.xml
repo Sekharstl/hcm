@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Console appender for tests -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Set log level for application packages to OFF to completely suppress error logs during tests -->
+    <logger name="tech.stl.hcm.candidate" level="OFF"/>
+    <logger name="tech.stl.hcm.core" level="OFF"/>
+    <logger name="tech.stl.hcm.common" level="OFF"/>
+    
+    <!-- Keep other loggers at WARN level -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+    
+    <!-- Root logger -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration> 
