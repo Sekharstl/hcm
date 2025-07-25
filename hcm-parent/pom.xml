@@ -45,7 +45,7 @@
         <h2.version>2.1.214</h2.version>
         <springdoc-openapi-maven-plugin.version>1.4</springdoc-openapi-maven-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
-        <sonar.host.url>http://10.19.5.50:30006</sonar.host.url>
+        <sonar.host.url>http://192.168.0.155:30033</sonar.host.url>
     </properties>
 
     <dependencyManagement>
@@ -189,12 +189,12 @@
         <repository>
             <id>nexus</id>
             <name>Nexus Releases Repository</name>
-            <url>http://10.19.5.50:30008/repository/maven-releases/</url>
+            <url>http://192.168.0.155:30034/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
             <id>nexus</id>
             <name>Nexus Snapshots Repository</name>
-            <url>http://10.19.5.50:30008/repository/maven-snapshots/</url>
+            <url>http://192.168.0.155:30034/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 

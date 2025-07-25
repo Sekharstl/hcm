@@ -82,16 +82,73 @@ pipeline {
             }
             steps {
                 script {
-                    // Always build hcm-common first as it's a dependency
-                    dir('hcm-common') {
-                        sh 'mvn clean install -DskipTests'
+                    // Check if dependencies need to be built
+                    def needsDependencyBuild = false
+                    def dependencyServices = []
+                    
+                    if (env.SERVICES_TO_BUILD.contains('hcm-common')) {
+                        needsDependencyBuild = true
+                        dependencyServices.add('hcm-common')
                     }
                     
-                    // Build hcm-message-broker if it has changes
                     if (env.SERVICES_TO_BUILD.contains('hcm-message-broker')) {
-                        dir('hcm-message-broker') {
-                            sh 'mvn clean install -DskipTests'
+                        needsDependencyBuild = true
+                        dependencyServices.add('hcm-message-broker')
+                    }
+                    
+                    // Check if any service depends on hcm-common (all services do)
+                    if (env.SERVICES_TO_BUILD.split(',').any { it != 'hcm-common' && it != 'hcm-message-broker' }) {
+                        if (!dependencyServices.contains('hcm-common')) {
+                            needsDependencyBuild = true
+                            dependencyServices.add('hcm-common')
                         }
+                    }
+                    
+                    if (needsDependencyBuild) {
+                        echo "Dependencies that need to be built: ${dependencyServices.join(', ')}"
+                        
+                        // Manual approval for dependency builds
+                        def userInput = input(
+                            id: 'dependencyApproval',
+                            message: "Approve building dependencies?",
+                            parameters: [
+                                choice(
+                                    name: 'BUILD_DEPENDENCIES',
+                                    choices: ['Yes', 'No'],
+                                    description: 'Do you want to build dependencies?'
+                                ),
+                                text(
+                                    name: 'REASON',
+                                    defaultValue: '',
+                                    description: 'Reason for building/not building dependencies (optional)'
+                                )
+                            ]
+                        )
+                        
+                        if (userInput.BUILD_DEPENDENCIES == 'Yes') {
+                            echo "Dependency build approved. Reason: ${userInput.REASON ?: 'No reason provided'}"
+                            
+                            // Build hcm-common first as it's a dependency
+                            if (dependencyServices.contains('hcm-common')) {
+                                echo "Building hcm-common..."
+                                dir('hcm-common') {
+                                    sh 'mvn clean install -DskipTests'
+                                }
+                            }
+                            
+                            // Build hcm-message-broker if it has changes
+                            if (dependencyServices.contains('hcm-message-broker')) {
+                                echo "Building hcm-message-broker..."
+                                dir('hcm-message-broker') {
+                                    sh 'mvn clean install -DskipTests'
+                                }
+                            }
+                        } else {
+                            echo "Dependency build rejected. Reason: ${userInput.REASON ?: 'No reason provided'}"
+                            echo "Proceeding without building dependencies. This may cause build failures if dependencies are not available."
+                        }
+                    } else {
+                        echo "No dependencies need to be built."
                     }
                 }
             }
